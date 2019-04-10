@@ -1,27 +1,33 @@
 package com.github.ruiadrmartins.locationsearcher.ui;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.adapter.LocationAdapter;
-import com.github.ruiadrmartins.locationsearcher.data.Suggestion;
-import com.github.ruiadrmartins.locationsearcher.network.NetworkController;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-
 public class MainActivity extends AppCompatActivity implements MainViewInterface, SearchView.OnQueryTextListener {
+
+    public static final int REQUEST_LOCATION_CODE = 101;
 
     private SearchView searchView;
     private RecyclerView recyclerView;
@@ -29,12 +35,35 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     private MainPresenter presenter;
 
+    private double longitude = 0;
+    private double latitude = 0;
+
+    private FusedLocationProviderClient fusedLocationClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION_CODE);
+            }
+        }
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if(location!=null) {
+                    Log.v("ASDF", String.valueOf(location.getLatitude()) + String.valueOf(location.getLongitude()));
+                    longitude = location.getLongitude();
+                    latitude = location.getLatitude();
+                }
+            }
+        });
 
         presenter = new MainPresenter(this, getApplication());
 
@@ -44,6 +73,11 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
         recyclerView = findViewById(R.id.recycler_view);
         updateData(new ArrayList<>());
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -61,28 +95,7 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     @Override
     public boolean onQueryTextChange(String s) {
-
-        presenter.getLocations(s);
-
-        /*
-        NetworkController network = new NetworkController();
-
-        Disposable observable = Observable.fromCallable(() -> network.start(s))
-                .retry(5)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        result -> {
-                            List<String> list = new ArrayList<>();
-                            for(Suggestion suggestion : result.getSuggestions()) {
-                                list.add(suggestion.getLabel());
-                            }
-                            updateData(list);
-                        },
-                        error -> {});*/
-        //observable.dispose();
-
-        //adapter.getFilter().filter(s);
+        presenter.getLocations(s, longitude, latitude);
         return false;
     }
 

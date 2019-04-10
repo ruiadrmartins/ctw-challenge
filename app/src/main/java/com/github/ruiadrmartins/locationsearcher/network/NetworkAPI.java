@@ -15,6 +15,7 @@ public interface NetworkAPI {
             @Query("app_id") String appId,
             @Query("app_code") String appCode,
             @Query("query") String query,
+            @Query("prox") String prox,
             @Query("beginHighlight") String beginHighlight,
             @Query("endHighlight") String endHighlight,
             @Query("maxresults") String maxresults);

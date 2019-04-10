@@ -28,11 +28,18 @@ public class NetworkController implements NetworkInterface {
     }
 
     @Override
-    public LocationResult start(String query) {
+    public LocationResult start(String query, double longitude, double latitude) {
         try {
             NetworkAPI api = initNetworkController();
 
-            Call<LocationResult> callLocation = api.getLocations(BuildConfig.HERE_APP_ID, BuildConfig.HERE_APP_CODE, query, "<b>", "</b>", "5");
+            Call<LocationResult> callLocation = api.getLocations(
+                    BuildConfig.HERE_APP_ID,
+                    BuildConfig.HERE_APP_CODE,
+                    query,
+                    getCoords(longitude, latitude),
+                    "<b>",
+                    "</b>",
+                    "5");
             Response<LocationResult> responseLocation = callLocation.execute();
 
             if(responseLocation.isSuccessful()) {
@@ -44,5 +51,9 @@ public class NetworkController implements NetworkInterface {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private String getCoords(double longitude, double latitude) {
+        return String.valueOf(latitude) + "," + String.valueOf(longitude);
     }
 }

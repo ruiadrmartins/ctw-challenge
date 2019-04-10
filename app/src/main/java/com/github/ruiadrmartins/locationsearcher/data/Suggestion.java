@@ -26,6 +26,9 @@ public class Suggestion {
     @SerializedName("matchLevel")
     @Expose
     private String matchLevel;
+    @SerializedName("distance")
+    @Expose
+    private String distance;
 
     public String getLabel() {
         return label;
@@ -73,6 +76,14 @@ public class Suggestion {
 
     public void setMatchLevel(String matchLevel) {
         this.matchLevel = matchLevel;
+    }
+
+    public String getDistance() {
+        return distance;
+    }
+
+    public void setDistance(String distance) {
+        this.distance = distance;
     }
 
 }

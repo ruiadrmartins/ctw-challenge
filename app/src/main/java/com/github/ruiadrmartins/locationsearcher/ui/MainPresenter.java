@@ -30,11 +30,11 @@ public class MainPresenter implements MainPresenterInterface {
     }
 
     @Override
-    public void getLocations(String text) {
+    public void getLocations(String text, double longitude, double latitude) {
 
         ((LocationSearcherApplication) application).getAppComponent().inject(this);
 
-        Disposable observable = Observable.fromCallable(() -> network.start(text))
+        Disposable observable = Observable.fromCallable(() -> network.start(text, longitude, latitude))
                 .retry(5)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
