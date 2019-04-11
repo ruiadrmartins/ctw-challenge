@@ -1,8 +1,10 @@
 package com.github.ruiadrmartins.locationsearcher.adapter;
 
 import android.app.Activity;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +33,13 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     }
 
     @Override
-    public void onBindViewHolder(@NonNull LocationAdapter.LocationHolder locationHolder, int i) {
-        locationHolder.locationText.setText(locationList.get(i).getDistance() + " -> " + locationList.get(i).getLabel());
+    public void onBindViewHolder(@NonNull LocationHolder locationHolder, int i) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            locationHolder.labelText.setText(Html.fromHtml(locationList.get(i).getLabel(), Html.FROM_HTML_MODE_LEGACY));
+        } else {
+            locationHolder.labelText.setText(Html.fromHtml(locationList.get(i).getLabel()));
+        }
+        locationHolder.distanceText.setText(String.format(activity.getString(R.string.distance_unit),locationList.get(i).getDistance()));
     }
 
     @Override
@@ -42,11 +49,13 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
 
     class LocationHolder extends RecyclerView.ViewHolder{
 
-        private TextView locationText;
+        private TextView labelText;
+        private TextView distanceText;
 
         LocationHolder(@NonNull View itemView) {
             super(itemView);
-            locationText = itemView.findViewById(R.id.location_text);
+            labelText = itemView.findViewById(R.id.label_text);
+            distanceText = itemView.findViewById(R.id.distance_text);
         }
     }
 }
