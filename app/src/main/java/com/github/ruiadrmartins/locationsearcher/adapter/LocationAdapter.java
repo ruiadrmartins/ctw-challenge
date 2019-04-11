@@ -9,15 +9,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.github.ruiadrmartins.locationsearcher.R;
+import com.github.ruiadrmartins.locationsearcher.data.Suggestion;
 
 import java.util.List;
 
 public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.LocationHolder> {
 
     private Activity activity;
-    private List<String> locationList;
+    private List<Suggestion> locationList;
 
-    public LocationAdapter(Activity activity, List<String> locationList) {
+    public LocationAdapter(Activity activity, List<Suggestion> locationList) {
         this.activity = activity;
         this.locationList = locationList;
     }
@@ -31,7 +32,7 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
 
     @Override
     public void onBindViewHolder(@NonNull LocationAdapter.LocationHolder locationHolder, int i) {
-        locationHolder.locationText.setText(locationList.get(i));
+        locationHolder.locationText.setText(locationList.get(i).getDistance() + " -> " + locationList.get(i).getLabel());
     }
 
     @Override

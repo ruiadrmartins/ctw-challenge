@@ -3,11 +3,9 @@ package com.github.ruiadrmartins.locationsearcher.ui;
 import android.app.Application;
 
 import com.github.ruiadrmartins.locationsearcher.LocationSearcherApplication;
-import com.github.ruiadrmartins.locationsearcher.data.Suggestion;
 import com.github.ruiadrmartins.locationsearcher.network.NetworkInterface;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -24,7 +22,7 @@ public class MainPresenter implements MainPresenterInterface {
     @Inject
     NetworkInterface network;
 
-    public MainPresenter(MainViewInterface mvi, Application application) {
+    MainPresenter(MainViewInterface mvi, Application application) {
         this.mvi = mvi;
         this.application = application;
     }
@@ -39,13 +37,7 @@ public class MainPresenter implements MainPresenterInterface {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        result -> {
-                            List<String> list = new ArrayList<>();
-                            for(Suggestion suggestion : result.getSuggestions()) {
-                                list.add(suggestion.getLabel());
-                            }
-                            mvi.updateData(list);
-                        },
+                        result -> mvi.updateData(new ArrayList<>(result.getSuggestions())),
                         error -> {});
     }
 }

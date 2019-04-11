@@ -39,7 +39,7 @@ public class NetworkController implements NetworkInterface {
                     getCoords(longitude, latitude),
                     "<b>",
                     "</b>",
-                    "5");
+                    "20");
             Response<LocationResult> responseLocation = callLocation.execute();
 
             if(responseLocation.isSuccessful()) {

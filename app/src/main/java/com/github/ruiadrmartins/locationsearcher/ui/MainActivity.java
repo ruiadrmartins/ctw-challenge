@@ -2,7 +2,6 @@ package com.github.ruiadrmartins.locationsearcher.ui;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,23 +10,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.adapter.LocationAdapter;
+import com.github.ruiadrmartins.locationsearcher.data.Suggestion;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity implements MainViewInterface, SearchView.OnQueryTextListener {
 
     public static final int REQUEST_LOCATION_CODE = 101;
+    public static final String LOCATION_LIST_KEY = "locationList";
 
     private SearchView searchView;
     private RecyclerView recyclerView;
@@ -35,10 +33,11 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     private MainPresenter presenter;
 
+    private ArrayList<Suggestion> locationList;
+
     private double longitude = 0;
     private double latitude = 0;
 
-    private FusedLocationProviderClient fusedLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,32 +46,22 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION_CODE);
-            }
-        }
-        fusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if(location!=null) {
-                    Log.v("ASDF", String.valueOf(location.getLatitude()) + String.valueOf(location.getLongitude()));
-                    longitude = location.getLongitude();
-                    latitude = location.getLatitude();
-                }
-            }
-        });
+        initLocation();
 
         presenter = new MainPresenter(this, getApplication());
 
         searchView = findViewById(R.id.search_view);
-        searchView.setQueryHint(getString(R.string.search_hint)); // Por alguma razao, a versao support nao permite queries no xml
+        searchView.setQueryHint(getString(R.string.search_hint)); // Por alguma razao, a versao support nao permite query hint no xml
         searchView.setOnQueryTextListener(this);
+        searchView.setOnCloseListener(() -> true);
 
         recyclerView = findViewById(R.id.recycler_view);
-        updateData(new ArrayList<>());
+
+        if(savedInstanceState == null) {
+            updateData(new ArrayList<>());
+        } else {
+            updateData(savedInstanceState.getParcelableArrayList(LOCATION_LIST_KEY));
+        }
     }
 
     @Override
@@ -81,9 +70,31 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     }
 
     @Override
-    public void updateData(List<String> list){
-        adapter = new LocationAdapter(this, list);
+    public void updateData(ArrayList<Suggestion> list){
+        locationList = list;
+        Collections.sort(locationList);
+
+        adapter = new LocationAdapter(this, locationList);
         recyclerView.setAdapter(adapter);
+    }
+
+    private void initLocation() {
+        FusedLocationProviderClient fusedLocationClient;
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION_CODE);
+            }
+        }
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+            if(location!=null) {
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
+            }
+        });
     }
 
 
@@ -95,7 +106,11 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     @Override
     public boolean onQueryTextChange(String s) {
-        presenter.getLocations(s, longitude, latitude);
+        if(s.isEmpty()) {
+            updateData(new ArrayList<>());
+        } else {
+            presenter.getLocations(s, longitude, latitude);
+        }
         return false;
     }
 
@@ -106,7 +121,6 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
 
 
     @Override
@@ -122,5 +136,11 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(LOCATION_LIST_KEY, locationList);
+        super.onSaveInstanceState(outState);
     }
 }

@@ -1,7 +1,9 @@
 package com.github.ruiadrmartins.locationsearcher.ui;
 
-import java.util.List;
+import com.github.ruiadrmartins.locationsearcher.data.Suggestion;
+
+import java.util.ArrayList;
 
 public interface MainViewInterface {
-    void updateData(List<String> list);
+    void updateData(ArrayList<Suggestion> list);
 }
