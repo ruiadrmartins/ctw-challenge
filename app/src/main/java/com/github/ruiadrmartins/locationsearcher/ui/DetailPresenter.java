@@ -39,8 +39,9 @@ public class DetailPresenter implements DetailPresenterInterface {
                 .subscribe(
                         result -> {
                             String latitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLatitude());
-                            String longitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLatitude());
+                            String longitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLongitude());
                             Log.v("HMM", longitude + "," + latitude);
+                            dvi.updateMap(Double.valueOf(latitude), Double.valueOf(longitude));
                         },
                         error -> {
                             Log.v("HMM",error.getMessage());
