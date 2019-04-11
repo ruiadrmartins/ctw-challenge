@@ -1,6 +1,6 @@
 package com.github.ruiadrmartins.locationsearcher.ui;
 
-import com.github.ruiadrmartins.locationsearcher.data.Suggestion;
+import com.github.ruiadrmartins.locationsearcher.data.autocomplete.Suggestion;
 
 import java.util.ArrayList;
 

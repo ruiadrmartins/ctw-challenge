@@ -15,7 +15,7 @@ import android.view.MenuItem;
 
 import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.adapter.LocationAdapter;
-import com.github.ruiadrmartins.locationsearcher.data.Suggestion;
+import com.github.ruiadrmartins.locationsearcher.data.autocomplete.Suggestion;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 

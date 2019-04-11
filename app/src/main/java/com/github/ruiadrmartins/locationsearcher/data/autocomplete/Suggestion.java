@@ -1,4 +1,4 @@
-package com.github.ruiadrmartins.locationsearcher.data;
+package com.github.ruiadrmartins.locationsearcher.data.autocomplete;
 
 import android.os.Parcel;
 import android.os.Parcelable;

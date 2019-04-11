@@ -1,7 +1,9 @@
 package com.github.ruiadrmartins.locationsearcher.network;
 
-import com.github.ruiadrmartins.locationsearcher.data.LocationResult;
+import com.github.ruiadrmartins.locationsearcher.data.autocomplete.LocationResult;
+import com.github.ruiadrmartins.locationsearcher.data.geocode.LocationDetailsResult;
 
 public interface NetworkInterface {
-    LocationResult start(String query, double longitude, double latitude);
+    LocationResult startGetLocationsAutocomplete(String query, double longitude, double latitude);
+    LocationDetailsResult startGetLocationDetails(String locationId);
 }
