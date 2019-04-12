@@ -1,10 +1,11 @@
 package com.github.ruiadrmartins.locationsearcher.ui;
 
 import android.app.Application;
-import android.util.Log;
 
 import com.github.ruiadrmartins.locationsearcher.LocationSearcherApplication;
+import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.network.NetworkInterface;
+import com.github.ruiadrmartins.locationsearcher.util.Utilities;
 
 import javax.inject.Inject;
 
@@ -30,24 +31,26 @@ public class DetailPresenter implements DetailPresenterInterface {
 
     @Override
     public void getLocationDetails(String locationId) {
-        ((LocationSearcherApplication) application).getAppComponent().inject(this);
+        if(Utilities.isNetworkConnected(application)) {
+            ((LocationSearcherApplication) application).getAppComponent().inject(this);
 
-        Disposable observable = Observable.fromCallable(() -> network.startGetLocationDetails(application.getBaseContext(), locationId))
-                .retry(5)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        result -> {
-                            String latitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLatitude());
-                            String longitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLongitude());
-                            String streetName = result.getResponse().getView().get(0).getResult().get(0).getLocation().getAddress().getLabel();
-                            String coords = latitude + "," + longitude;
-                            dvi.updateMap(Double.valueOf(latitude), Double.valueOf(longitude));
-                            dvi.setCoords(coords);
-                            dvi.setStreet(streetName);
-                        },
-                        error -> {
-                            Log.v("HMM", error.getMessage());
-                        });
+            Disposable observable = Observable.fromCallable(() -> network.startGetLocationDetails(application.getBaseContext(), locationId))
+                    .retry(5)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            result -> {
+                                String latitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLatitude());
+                                String longitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLongitude());
+                                String streetName = result.getResponse().getView().get(0).getResult().get(0).getLocation().getAddress().getLabel();
+                                String coords = latitude + "," + longitude;
+                                dvi.updateMap(Double.valueOf(latitude), Double.valueOf(longitude));
+                                dvi.setCoords(coords);
+                                dvi.setStreet(streetName);
+                            },
+                            error -> dvi.showError(error.getMessage()));
+        } else {
+            dvi.showError(application.getString(R.string.network_not_connected));
+        }
     }
 }

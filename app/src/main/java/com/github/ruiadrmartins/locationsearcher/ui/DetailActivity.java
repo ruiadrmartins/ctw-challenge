@@ -20,6 +20,9 @@ import com.vlonjatg.progressactivity.ProgressLinearLayout;
 public class DetailActivity extends AppCompatActivity implements DetailViewInterface {
 
     public static final String LOCATION_DETAILS_KEY = "locationDetails";
+    public static final String LOCATION_DETAILS_LATITUDE_KEY = "locationLatitude";
+    public static final String LOCATION_DETAILS_LONGITUDE_KEY = "locationLongitude";
+    public static final String LOCATION_DETAILS_STREET_KEY = "streetName";
 
     private LinearLayout linearLayout;
     private ProgressLinearLayout progressLinearLayout;
@@ -29,10 +32,16 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
     private Map map = null;
     private MapFragment mapFragment = null;
 
+    private Suggestion suggestion;
+
     private TextView street;
     private TextView postalCode;
     private TextView coordenates;
     private TextView distance;
+
+    private double latitude;
+    private double longitude;
+    private String streetName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,25 +69,45 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
 
         progressLinearLayout = findViewById(R.id.progress_linear_layout);
 
-        Suggestion s = getIntent().getParcelableExtra(LOCATION_DETAILS_KEY);
-        presenter.getLocationDetails(s.getLocationId());
+        if(savedInstanceState != null) {
+            suggestion = savedInstanceState.getParcelable(LOCATION_DETAILS_KEY);
+            latitude = savedInstanceState.getDouble(LOCATION_DETAILS_LATITUDE_KEY);
+            longitude = savedInstanceState.getDouble(LOCATION_DETAILS_LONGITUDE_KEY);
+            streetName = savedInstanceState.getString(LOCATION_DETAILS_STREET_KEY);
+            setStreet(streetName);
+            setCoords(latitude + "," + longitude);
+            updateMap(latitude, longitude);
+        } else if(getIntent() != null){
+            suggestion = getIntent().getParcelableExtra(LOCATION_DETAILS_KEY);
+            if(suggestion != null) {
+                presenter.getLocationDetails(suggestion.getLocationId());
+            } else {
+                showError(getString(R.string.error_list_description));
+            }
+        }
 
-        setPostalCode(s.getAddress().getPostalCode());
-        setDistance(s.getDistance());
+        if(suggestion != null) {
+            setPostalCode(suggestion.getAddress().getPostalCode());
+            setDistance(suggestion.getDistance());
+        } else {
+            showError(getString(R.string.error_list_description));
+        }
     }
 
     @Override
-    public void showError() {
+    public void showError(String error) {
         progressLinearLayout.showError(
                 R.drawable.ic_error_black_24dp,
                 getString(R.string.error_list_title), getString(R.string.error_list_description),
-                getString(R.string.error_list_button),
+                error,
                 view -> Toast.makeText(this, "Lol.", Toast.LENGTH_SHORT).show()
         );
     }
 
     @Override
     public void updateMap(double latitude, double longitude) {
+        this.longitude = longitude;
+        this.latitude = latitude;
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.mapfragment);
         mapFragment.init(error -> {
             if (error == OnEngineInitListener.Error.NONE) {
@@ -93,6 +122,7 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
 
     @Override
     public void setStreet(String streetName) {
+        this.streetName = streetName;
         street.setText(streetName);
     }
 
@@ -111,4 +141,12 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
         distance.setText(String.format(getString(R.string.distance_unit), dist));
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable(LOCATION_DETAILS_KEY, suggestion);
+        outState.putDouble(LOCATION_DETAILS_LATITUDE_KEY, latitude);
+        outState.putDouble(LOCATION_DETAILS_LONGITUDE_KEY, longitude);
+        outState.putString(LOCATION_DETAILS_STREET_KEY, streetName);
+        super.onSaveInstanceState(outState);
+    }
 }

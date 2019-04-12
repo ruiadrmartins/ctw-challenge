@@ -7,5 +7,5 @@ import java.util.ArrayList;
 public interface MainViewInterface {
     void updateData(ArrayList<Suggestion> list);
     void showEmpty();
-    void showError();
+    void showError(String error);
 }

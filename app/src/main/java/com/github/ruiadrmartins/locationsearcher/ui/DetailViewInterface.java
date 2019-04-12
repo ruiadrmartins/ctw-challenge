@@ -7,5 +7,5 @@ public interface DetailViewInterface {
     void setCoords(String coords);
     void setDistance(String dist);
 
-    void showError();
+    void showError(String error);
 }

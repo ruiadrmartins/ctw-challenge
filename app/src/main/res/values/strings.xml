@@ -19,4 +19,6 @@
     <string name="error_list_title">Error</string>
     <string name="error_list_description">Something went wrong</string>
     <string name="error_list_button">Try again.</string>
+
+    <string name="network_not_connected">Network not connected</string>
 </resources>

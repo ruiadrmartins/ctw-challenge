@@ -122,10 +122,10 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     }
 
     @Override
-    public void showError() {
+    public void showError(String error) {
         progressLayout.showError(
                 R.drawable.ic_error_black_24dp,
-                getString(R.string.error_list_title), getString(R.string.error_list_description),
+                getString(R.string.error_list_title), error,
                 getString(R.string.error_list_button),
                 view -> Toast.makeText(this, "Lol.", Toast.LENGTH_SHORT).show()
         );
