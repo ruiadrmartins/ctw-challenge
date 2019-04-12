@@ -18,10 +18,12 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.adapter.LocationAdapter;
 import com.github.ruiadrmartins.locationsearcher.data.autocomplete.Suggestion;
+import com.github.ruiadrmartins.locationsearcher.util.Preferences;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -32,6 +34,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
+import com.vlonjatg.progressactivity.ProgressLinearLayout;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     private LocationCallback mLocationCallback;
     private Location mCurrentLocation;
 
+    private ProgressLinearLayout progressLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +86,8 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         searchView.requestFocus();
 
         recyclerView = findViewById(R.id.recycler_view);
+
+        progressLayout = findViewById(R.id.progress_layout);
 
         if(savedInstanceState == null) {
             updateData(new ArrayList<>());
@@ -107,12 +114,35 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     }
 
     @Override
+    public void showEmpty() {
+        progressLayout.showEmpty(
+                R.drawable.ic_view_list_black_24dp,
+                getString(R.string.empty_list_title), getString(R.string.empty_list_description)
+        );
+    }
+
+    @Override
+    public void showError() {
+        progressLayout.showError(
+                R.drawable.ic_error_black_24dp,
+                getString(R.string.error_list_title), getString(R.string.error_list_description),
+                getString(R.string.error_list_button),
+                view -> Toast.makeText(this, "Lol.", Toast.LENGTH_SHORT).show()
+        );
+    }
+
+    @Override
     public void updateData(ArrayList<Suggestion> list){
         locationList = list;
         Collections.sort(locationList);
 
         adapter = new LocationAdapter(this, locationList);
         recyclerView.setAdapter(adapter);
+        if(list.size() == 0) {
+            showEmpty();
+        } else {
+            progressLayout.showContent();
+        }
     }
 
     // Search Query specific methods
@@ -123,6 +153,8 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     @Override
     public boolean onQueryTextChange(String s) {
+        //progressLayout.showLoading();
+
         if(s.isEmpty()) {
             updateData(new ArrayList<>());
         } else {
@@ -143,7 +175,14 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_sort_distance) {
+            Preferences.setSortPreference(getBaseContext(), Preferences.SORT_BY_DISTANCE);
+            item.setChecked(true);
+            return true;
+        }
+        if (id == R.id.action_sort_name) {
+            Preferences.setSortPreference(getBaseContext(), Preferences.SORT_BY_NAME);
+            item.setChecked(true);
             return true;
         }
 

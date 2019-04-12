@@ -47,7 +47,7 @@ public class DetailPresenter implements DetailPresenterInterface {
                             dvi.setStreet(streetName);
                         },
                         error -> {
-                            Log.v("HMM",error.getMessage());
+                            Log.v("HMM", error.getMessage());
                         });
     }
 }

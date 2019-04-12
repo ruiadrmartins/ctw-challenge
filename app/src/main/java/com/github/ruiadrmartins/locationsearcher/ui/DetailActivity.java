@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.data.autocomplete.Suggestion;
@@ -14,12 +15,14 @@ import com.here.android.mpa.common.OnEngineInitListener;
 import com.here.android.mpa.mapping.Map;
 import com.here.android.mpa.mapping.MapFragment;
 import com.here.android.mpa.mapping.MapMarker;
+import com.vlonjatg.progressactivity.ProgressLinearLayout;
 
 public class DetailActivity extends AppCompatActivity implements DetailViewInterface {
 
     public static final String LOCATION_DETAILS_KEY = "locationDetails";
 
     private LinearLayout linearLayout;
+    private ProgressLinearLayout progressLinearLayout;
 
     private DetailPresenter presenter;
 
@@ -55,11 +58,23 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
         coordenates = findViewById(R.id.coordinates_text);
         distance = findViewById(R.id.distance_text);
 
+        progressLinearLayout = findViewById(R.id.progress_linear_layout);
+
         Suggestion s = getIntent().getParcelableExtra(LOCATION_DETAILS_KEY);
         presenter.getLocationDetails(s.getLocationId());
 
         setPostalCode(s.getAddress().getPostalCode());
         setDistance(s.getDistance());
+    }
+
+    @Override
+    public void showError() {
+        progressLinearLayout.showError(
+                R.drawable.ic_error_black_24dp,
+                getString(R.string.error_list_title), getString(R.string.error_list_description),
+                getString(R.string.error_list_button),
+                view -> Toast.makeText(this, "Lol.", Toast.LENGTH_SHORT).show()
+        );
     }
 
     @Override
@@ -93,7 +108,7 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
 
     @Override
     public void setDistance(String dist) {
-        distance.setText(dist);
+        distance.setText(String.format(getString(R.string.distance_unit), dist));
     }
 
 }

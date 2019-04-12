@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <com.vlonjatg.progressactivity.ProgressLinearLayout
+        android:id="@+id/progress_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="8dp"
@@ -67,5 +68,5 @@
             android:layout_height="wrap_content"
             android:layout_margin="4dp" />
 
-    </LinearLayout>
+    </com.vlonjatg.progressactivity.ProgressLinearLayout>
 </android.support.constraint.ConstraintLayout>
