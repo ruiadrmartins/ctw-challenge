@@ -40,8 +40,11 @@ public class DetailPresenter implements DetailPresenterInterface {
                         result -> {
                             String latitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLatitude());
                             String longitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLongitude());
-                            Log.v("HMM", longitude + "," + latitude);
+                            String streetName = result.getResponse().getView().get(0).getResult().get(0).getLocation().getAddress().getLabel();
+                            String coords = latitude + "," + longitude;
                             dvi.updateMap(Double.valueOf(latitude), Double.valueOf(longitude));
+                            dvi.setCoords(coords);
+                            dvi.setStreet(streetName);
                         },
                         error -> {
                             Log.v("HMM",error.getMessage());

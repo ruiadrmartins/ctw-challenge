@@ -27,17 +27,12 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <LinearLayout
+        <include
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            layout="@layout/detail_content_information"/>
 
-            <TextView
-                android:text="OI"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

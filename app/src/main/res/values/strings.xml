@@ -4,4 +4,9 @@
     <string name="search_hint">Search here</string>
     <string name="distance_unit">%1$s meters</string>
     <string name="title_activity_detail">DetailActivity</string>
+
+    <string name="street_label">Street</string>
+    <string name="postal_code_label">Postal Code</string>
+    <string name="coordinates_label">Coordinates</string>
+    <string name="distance_label">Distance</string>
 </resources>

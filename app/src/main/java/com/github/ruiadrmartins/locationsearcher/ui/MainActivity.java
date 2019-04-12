@@ -1,9 +1,15 @@
 package com.github.ruiadrmartins.locationsearcher.ui;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,16 +22,29 @@ import android.view.MenuItem;
 import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.adapter.LocationAdapter;
 import com.github.ruiadrmartins.locationsearcher.data.autocomplete.Suggestion;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.SettingsClient;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity implements MainViewInterface, SearchView.OnQueryTextListener {
 
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     public static final int REQUEST_LOCATION_CODE = 101;
+    private static final int REQUEST_CHECK_SETTINGS = 0x1;
+
     public static final String LOCATION_LIST_KEY = "locationList";
+    public static final String LOCATION_LATITUDE_KEY = "locationLatitude";
+    public static final String LOCATION_LONGITUDE_KEY = "locationLongitude";
 
     private SearchView searchView;
     private RecyclerView recyclerView;
@@ -38,6 +57,12 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     private double longitude = 0;
     private double latitude = 0;
 
+    private FusedLocationProviderClient mFusedLocationClient;
+    private SettingsClient mSettingsClient;
+    private LocationRequest mLocationRequest;
+    private LocationSettingsRequest mLocationSettingsRequest;
+    private LocationCallback mLocationCallback;
+    private Location mCurrentLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +71,6 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        initLocation();
-
         presenter = new MainPresenter(this, getApplication());
 
         searchView = findViewById(R.id.search_view);
@@ -55,18 +78,32 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         searchView.setOnQueryTextListener(this);
         searchView.setOnCloseListener(() -> true);
 
+        searchView.requestFocus();
+
         recyclerView = findViewById(R.id.recycler_view);
 
         if(savedInstanceState == null) {
             updateData(new ArrayList<>());
         } else {
             updateData(savedInstanceState.getParcelableArrayList(LOCATION_LIST_KEY));
+            latitude = savedInstanceState.getDouble(LOCATION_LATITUDE_KEY);
+            longitude = savedInstanceState.getDouble(LOCATION_LONGITUDE_KEY);
         }
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mSettingsClient = LocationServices.getSettingsClient(this);
+
+        createLocationCallback();
+        createLocationRequest();
+        buildLocationSettingsRequest();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    private void checkPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION_CODE);
+            }
+        }
     }
 
     @Override
@@ -77,25 +114,6 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         adapter = new LocationAdapter(this, locationList);
         recyclerView.setAdapter(adapter);
     }
-
-    private void initLocation() {
-        FusedLocationProviderClient fusedLocationClient;
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_LOCATION_CODE);
-            }
-        }
-
-        fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
-            if(location!=null) {
-                longitude = location.getLongitude();
-                latitude = location.getLatitude();
-            }
-        });
-    }
-
 
     // Search Query specific methods
     @Override
@@ -116,7 +134,6 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -124,12 +141,8 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -140,6 +153,95 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList(LOCATION_LIST_KEY, locationList);
+        outState.putDouble(LOCATION_LATITUDE_KEY, latitude);
+        outState.putDouble(LOCATION_LONGITUDE_KEY, longitude);
         super.onSaveInstanceState(outState);
+    }
+
+    // Location stuff
+    // Inspired from https://github.com/googlesamples/android-play-location/tree/master/LocationUpdates
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    private void createLocationCallback() {
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                mCurrentLocation = locationResult.getLastLocation();
+                updateLocation();
+            }
+        };
+    }
+
+    private void buildLocationSettingsRequest() {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+        mLocationSettingsRequest = builder.build();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_CHECK_SETTINGS:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        startLocationUpdates();
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        updateLocation();
+                        break;
+                }
+                break;
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void startLocationUpdates() {
+        mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
+                .addOnSuccessListener(this, locationSettingsResponse -> {
+                    mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                            mLocationCallback, Looper.myLooper());
+                    updateLocation();
+                })
+                .addOnFailureListener(this, e -> {
+                    int statusCode = ((ApiException) e).getStatusCode();
+                    if(statusCode == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
+                        try {
+                            ResolvableApiException rae = (ResolvableApiException) e;
+                            rae.startResolutionForResult(this, REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException sie) {
+                            sie.printStackTrace();
+                        }
+                    }
+                    updateLocation();
+                });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startLocationUpdates();
+            }
+        }
+    }
+
+    private void updateLocation() {
+        if (mCurrentLocation != null) {
+            latitude = mCurrentLocation.getLatitude();
+            longitude = mCurrentLocation.getLongitude();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkPermissions();
+        startLocationUpdates();
     }
 }

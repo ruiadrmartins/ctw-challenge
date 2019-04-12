@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.data.autocomplete.Suggestion;
@@ -25,6 +26,11 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
     private Map map = null;
     private MapFragment mapFragment = null;
 
+    private TextView street;
+    private TextView postalCode;
+    private TextView coordenates;
+    private TextView distance;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,9 +50,16 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
 
         presenter = new DetailPresenter(this, getApplication());
 
+        street = findViewById(R.id.street_text);
+        postalCode = findViewById(R.id.postal_code_text);
+        coordenates = findViewById(R.id.coordinates_text);
+        distance = findViewById(R.id.distance_text);
+
         Suggestion s = getIntent().getParcelableExtra(LOCATION_DETAILS_KEY);
         presenter.getLocationDetails(s.getLocationId());
 
+        setPostalCode(s.getAddress().getPostalCode());
+        setDistance(s.getDistance());
     }
 
     @Override
@@ -61,6 +74,26 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
                 map.addMapObject(new MapMarker(coords));
             }
         });
+    }
+
+    @Override
+    public void setStreet(String streetName) {
+        street.setText(streetName);
+    }
+
+    @Override
+    public void setPostalCode(String pCode) {
+        postalCode.setText(pCode);
+    }
+
+    @Override
+    public void setCoords(String coords) {
+        coordenates.setText(coords);
+    }
+
+    @Override
+    public void setDistance(String dist) {
+        distance.setText(dist);
     }
 
 }
