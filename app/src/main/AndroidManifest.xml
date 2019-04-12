@@ -20,8 +20,8 @@
         android:theme="@style/AppTheme"
         android:fullBackupContent="true"
         tools:ignore="GoogleAppIndexingWarning">
-        <meta-data android:name="com.here.android.maps.appid" android:value="ykhDfx9eciWA0ssWIWR5"/>
-        <meta-data android:name="com.here.android.maps.apptoken" android:value="aa7ZygnH6VFeKtaWp4Vziw"/>
+        <meta-data android:name="com.here.android.maps.appid" android:value="@string/hereAppId"/>
+        <meta-data android:name="com.here.android.maps.apptoken" android:value="@string/hereAppCode"/>
         <activity
             android:name=".ui.DetailActivity"
             android:label="@string/title_activity_detail"

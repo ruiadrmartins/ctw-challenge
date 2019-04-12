@@ -9,17 +9,15 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        resValue "string", "hereAppId", hereAppId
+        resValue "string", "hereAppCode", hereAppCode
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-    }
-
-    buildTypes.each {
-        it.buildConfigField 'String', "HERE_APP_ID", hereAppId
-        it.buildConfigField 'String', "HERE_APP_CODE", hereAppCode
     }
 
     compileOptions {

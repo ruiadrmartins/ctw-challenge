@@ -32,7 +32,7 @@ public class MainPresenter implements MainPresenterInterface {
 
         ((LocationSearcherApplication) application).getAppComponent().inject(this);
 
-        Disposable observable = Observable.fromCallable(() -> network.startGetLocationsAutocomplete(text, longitude, latitude))
+        Disposable observable = Observable.fromCallable(() -> network.startGetLocationsAutocomplete(application.getBaseContext(), text, longitude, latitude))
                 .retry(5)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

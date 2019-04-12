@@ -32,7 +32,7 @@ public class DetailPresenter implements DetailPresenterInterface {
     public void getLocationDetails(String locationId) {
         ((LocationSearcherApplication) application).getAppComponent().inject(this);
 
-        Disposable observable = Observable.fromCallable(() -> network.startGetLocationDetails(locationId))
+        Disposable observable = Observable.fromCallable(() -> network.startGetLocationDetails(application.getBaseContext(), locationId))
                 .retry(5)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

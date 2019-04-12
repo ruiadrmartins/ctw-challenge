@@ -1,8 +1,9 @@
 package com.github.ruiadrmartins.locationsearcher.network;
 
+import android.content.Context;
 import android.util.Log;
 
-import com.github.ruiadrmartins.locationsearcher.BuildConfig;
+import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.data.autocomplete.LocationResult;
 import com.github.ruiadrmartins.locationsearcher.data.geocode.LocationDetailsResult;
 import com.google.gson.Gson;
@@ -16,6 +17,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class NetworkController implements NetworkInterface {
+
 
     public NetworkAPI initNetworkController(String url) {
         Gson gson = new GsonBuilder()
@@ -31,13 +33,14 @@ public class NetworkController implements NetworkInterface {
     }
 
     @Override
-    public LocationResult startGetLocationsAutocomplete(String query, double longitude, double latitude) {
+    public LocationResult startGetLocationsAutocomplete(Context context, String query, double longitude, double latitude) {
+
         try {
             NetworkAPI api = initNetworkController(NetworkAPI.BASE_URL_AUTOCOMPLETE);
 
             Call<LocationResult> callLocation = api.getLocations(
-                    BuildConfig.HERE_APP_ID,
-                    BuildConfig.HERE_APP_CODE,
+                    context.getString(R.string.hereAppId),
+                    context.getString(R.string.hereAppCode),
                     query,
                     getCoords(longitude, latitude),
                     "<b>",
@@ -62,13 +65,13 @@ public class NetworkController implements NetworkInterface {
     }
 
     @Override
-    public LocationDetailsResult startGetLocationDetails(String locationId) {
+    public LocationDetailsResult startGetLocationDetails(Context context, String locationId) {
         try {
             NetworkAPI api = initNetworkController(NetworkAPI.BASE_URL_GEOCODE);
 
             Call<LocationDetailsResult> callLocation = api.getLocationDetails(
-                    BuildConfig.HERE_APP_ID,
-                    BuildConfig.HERE_APP_CODE,
+                    context.getString(R.string.hereAppId),
+                    context.getString(R.string.hereAppCode),
                     locationId);
 
             Response<LocationDetailsResult> responseLocationDetails = callLocation.execute();
