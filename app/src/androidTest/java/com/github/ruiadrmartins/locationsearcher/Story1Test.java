@@ -39,6 +39,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 @RunWith(AndroidJUnit4.class)
 public class Story1Test {
 
+    // TODO: Use something else other than sleep, it's not reliable
     @Rule
     public ActivityTestRule<MainActivity> mainActivityActivityTestRule = new ActivityTestRule<MainActivity>(MainActivity.class) {
 
@@ -93,6 +94,7 @@ public class Story1Test {
     }
 
     // 4. The user must be able to scroll through the list of locations
+    // TODO: Find a better way to test this
     @Test
     public void locationListIsScrollableTest() {
         onView(withId(R.id.search_view)).perform(click());

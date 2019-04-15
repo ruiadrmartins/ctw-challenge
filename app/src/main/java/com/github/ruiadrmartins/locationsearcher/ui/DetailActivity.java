@@ -17,6 +17,7 @@ import com.here.android.mpa.mapping.MapFragment;
 import com.here.android.mpa.mapping.MapMarker;
 import com.vlonjatg.progressactivity.ProgressLinearLayout;
 
+// TODO: Butterknife
 public class DetailActivity extends AppCompatActivity implements DetailViewInterface {
 
     public static final String LOCATION_DETAILS_KEY = "locationDetails";

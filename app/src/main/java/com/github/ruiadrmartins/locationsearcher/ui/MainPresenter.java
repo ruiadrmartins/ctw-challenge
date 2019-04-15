@@ -34,6 +34,7 @@ public class MainPresenter implements MainPresenterInterface {
         if(Utilities.isNetworkConnected(application)) {
             ((LocationSearcherApplication) application).getAppComponent().inject(this);
 
+            // TODO: handle observable closure
             Disposable observable = Observable.fromCallable(() -> network.startGetLocationsAutocomplete(application.getBaseContext(), text, longitude, latitude))
                     .retry(5)
                     .subscribeOn(Schedulers.io())

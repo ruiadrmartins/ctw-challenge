@@ -39,6 +39,7 @@ import com.vlonjatg.progressactivity.ProgressLinearLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 
+// TODO: Butterknife
 public class MainActivity extends AppCompatActivity implements MainViewInterface, SearchView.OnQueryTextListener {
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
@@ -82,7 +83,6 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         searchView.setQueryHint(getString(R.string.search_hint)); // Por alguma razao, a versao support nao permite query hint no xml
         searchView.setOnQueryTextListener(this);
         searchView.setIconifiedByDefault(false);
-        //searchView.requestFocus();
         searchView.setOnCloseListener(() -> true);
 
         searchView.requestFocus();

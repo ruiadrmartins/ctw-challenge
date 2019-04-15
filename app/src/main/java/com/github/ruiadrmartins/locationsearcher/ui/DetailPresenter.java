@@ -34,6 +34,7 @@ public class DetailPresenter implements DetailPresenterInterface {
         if(Utilities.isNetworkConnected(application)) {
             ((LocationSearcherApplication) application).getAppComponent().inject(this);
 
+            // TODO: handle observable closure
             Disposable observable = Observable.fromCallable(() -> network.startGetLocationDetails(application.getBaseContext(), locationId))
                     .retry(5)
                     .subscribeOn(Schedulers.io())

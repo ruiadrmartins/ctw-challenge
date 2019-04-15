@@ -3,7 +3,6 @@ package com.github.ruiadrmartins.locationsearcher;
 import android.content.pm.ActivityInfo;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
-import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.github.ruiadrmartins.locationsearcher.network.AppComponent;
@@ -32,6 +31,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 @RunWith(AndroidJUnit4.class)
 public class Story2Test {
 
+    // TODO: Use something else other than sleep, it's not reliable
     @Rule
     public IntentsTestRule<MainActivity> intentsTestRule = new IntentsTestRule<MainActivity>(MainActivity.class) {
 
@@ -136,10 +136,11 @@ public class Story2Test {
     // 5. The map should contain a pin in the correct place for the selected location
     @Test
     public void Test5() {
-        
+
     }
 
     // 6. Bonus: When the orientation changes to landscape the map should be on the left of the other address details
+    // TODO: Orientation doesn't go back to original
     @Test
     public void orientationChangeInformationLocationTest() {
 
