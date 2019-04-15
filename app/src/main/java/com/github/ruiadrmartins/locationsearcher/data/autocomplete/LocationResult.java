@@ -1,4 +1,4 @@
-package com.github.ruiadrmartins.locationsearcher.data;
+package com.github.ruiadrmartins.locationsearcher.data.autocomplete;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;

@@ -3,7 +3,9 @@ package com.github.ruiadrmartins.locationsearcher.ui;
 import android.app.Application;
 
 import com.github.ruiadrmartins.locationsearcher.LocationSearcherApplication;
+import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.network.NetworkInterface;
+import com.github.ruiadrmartins.locationsearcher.util.Utilities;
 
 import java.util.ArrayList;
 
@@ -29,15 +31,18 @@ public class MainPresenter implements MainPresenterInterface {
 
     @Override
     public void getLocations(String text, double longitude, double latitude) {
+        if(Utilities.isNetworkConnected(application)) {
+            ((LocationSearcherApplication) application).getAppComponent().inject(this);
 
-        ((LocationSearcherApplication) application).getAppComponent().inject(this);
-
-        Disposable observable = Observable.fromCallable(() -> network.start(text, longitude, latitude))
-                .retry(5)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        result -> mvi.updateData(new ArrayList<>(result.getSuggestions())),
-                        error -> {});
+            Disposable observable = Observable.fromCallable(() -> network.startGetLocationsAutocomplete(application.getBaseContext(), text, longitude, latitude))
+                    .retry(5)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            result -> mvi.updateData(new ArrayList<>(result.getSuggestions())),
+                            error -> mvi.showError(error.getMessage()));
+        } else {
+            mvi.showError(application.getString(R.string.network_not_connected));
+        }
     }
 }

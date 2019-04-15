@@ -9,6 +9,9 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        resValue "string", "hereAppId", hereAppId
+        resValue "string", "hereAppCode", hereAppCode
     }
     buildTypes {
         release {
@@ -17,14 +20,14 @@ android {
         }
     }
 
-    buildTypes.each {
-        it.buildConfigField 'String', "HERE_APP_ID", hereAppId
-        it.buildConfigField 'String', "HERE_APP_CODE", hereAppCode
-    }
-
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
+    }
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
     }
 }
 
@@ -50,4 +53,9 @@ dependencies {
     annotationProcessor 'com.google.dagger:dagger-compiler:2.16'
 
     implementation 'com.google.android.gms:play-services-location:16.0.0'
+
+    implementation(name:'HERE-sdk', ext:'aar')
+
+    implementation 'com.github.vlonjatg:progress-activity:2.0.5'
+
 }

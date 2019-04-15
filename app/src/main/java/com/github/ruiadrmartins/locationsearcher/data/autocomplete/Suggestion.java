@@ -1,4 +1,4 @@
-package com.github.ruiadrmartins.locationsearcher.data;
+package com.github.ruiadrmartins.locationsearcher.data.autocomplete;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -96,7 +96,7 @@ public class Suggestion implements Comparable<Suggestion>, Parcelable {
         if(getDistance() == null || suggestion.getDistance() == null) {
             return 0;
         } else {
-            return getDistance().compareTo(suggestion.getDistance());
+            return Integer.valueOf(getDistance()).compareTo(Integer.valueOf(suggestion.getDistance()));
         }
     }
 

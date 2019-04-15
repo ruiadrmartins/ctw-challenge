@@ -1,6 +1,24 @@
 <resources>
-    <string name="app_name">LocationSearcher</string>
-    <string name="action_settings">Settings</string>
+    <string name="app_name">Location Searcher</string>
+
+    <string name="action_sort_name">Sort by name</string>
+    <string name="action_sort_distance">Sort by distance</string>
+
     <string name="search_hint">Search here</string>
     <string name="distance_unit">%1$s meters</string>
+    <string name="title_activity_detail">Location Details</string>
+
+    <string name="street_label">Street</string>
+    <string name="postal_code_label">Postal Code</string>
+    <string name="coordinates_label">Coordinates</string>
+    <string name="distance_label">Distance</string>
+
+    <string name="empty_list_title">No results</string>
+    <string name="empty_list_description">Search for results</string>
+
+    <string name="error_list_title">Error</string>
+    <string name="error_list_description">Something went wrong</string>
+    <string name="error_list_button">Try again.</string>
+
+    <string name="network_not_connected">Network not connected</string>
 </resources>
