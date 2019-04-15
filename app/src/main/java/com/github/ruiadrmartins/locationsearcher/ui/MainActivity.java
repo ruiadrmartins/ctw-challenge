@@ -81,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         searchView = findViewById(R.id.search_view);
         searchView.setQueryHint(getString(R.string.search_hint)); // Por alguma razao, a versao support nao permite query hint no xml
         searchView.setOnQueryTextListener(this);
+        searchView.setIconifiedByDefault(false);
+        //searchView.requestFocus();
         searchView.setOnCloseListener(() -> true);
 
         searchView.requestFocus();

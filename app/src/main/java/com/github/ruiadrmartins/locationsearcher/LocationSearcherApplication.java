@@ -18,6 +18,10 @@ public class LocationSearcherApplication extends Application {
         return appComponent;
     }
 
+    public void setAppComponent(AppComponent appComponent) {
+        this.appComponent = appComponent;
+    }
+
     private AppComponent generateAppComponent() {
         return DaggerAppComponent.builder().networkModule(new NetworkModule()).build();
     }

@@ -21,6 +21,11 @@ import java.util.List;
 public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.LocationHolder> {
 
     private Activity activity;
+
+    public List<Suggestion> getLocationList() {
+        return locationList;
+    }
+
     private List<Suggestion> locationList;
 
     public LocationAdapter(Activity activity, List<Suggestion> locationList) {

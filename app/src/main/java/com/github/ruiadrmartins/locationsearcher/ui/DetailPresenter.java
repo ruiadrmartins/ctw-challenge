@@ -24,7 +24,7 @@ public class DetailPresenter implements DetailPresenterInterface {
     @Inject
     NetworkInterface network;
 
-    public DetailPresenter(DetailViewInterface dvi, Application application) {
+    DetailPresenter(DetailViewInterface dvi, Application application) {
         this.application = application;
         this.dvi = dvi;
     }
