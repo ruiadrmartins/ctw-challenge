@@ -24,18 +24,22 @@ import static android.support.test.espresso.assertion.ViewAssertions.doesNotExis
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.contrib.RecyclerViewActions.scrollToPosition;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.github.ruiadrmartins.locationsearcher.TestUtilities.isSortedByDistance;
+import static com.github.ruiadrmartins.locationsearcher.TestUtilities.waitId;
 
 
 @RunWith(AndroidJUnit4.class)
 public class Story1Test {
 
-    @Rule public GrantPermissionRule permissionRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION);
-    @Rule public GrantPermissionRule permissionRule2 = GrantPermissionRule.grant(Manifest.permission.ACCESS_COARSE_LOCATION);
+    @Rule
+    public GrantPermissionRule permissionRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION);
 
-    // TODO: Use something else other than Thread.sleep, it's not reliable
+    @Rule
+    public GrantPermissionRule permissionRule2 = GrantPermissionRule.grant(Manifest.permission.ACCESS_COARSE_LOCATION);
+
     @Rule
     public ActivityTestRule<MainActivity> mainActivityActivityTestRule = new ActivityTestRule<MainActivity>(MainActivity.class) {
 
@@ -65,11 +69,9 @@ public class Story1Test {
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
         onView(withId(android.support.design.R.id.search_src_text)).check(matches(withText("A")));
         closeSoftKeyboard();
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.recycler_view, 500));
+
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
         onView(withId(R.id.recycler_view)).perform(scrollToPosition(0));
         onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(0, R.id.label_text)).check(matches(withText("Ghana, Greater Accra, Accra")));
@@ -90,11 +92,9 @@ public class Story1Test {
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(replaceText("A"));
         closeSoftKeyboard();
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.recycler_view, 500));
+
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
         onView(withId(R.id.recycler_view)).check(matches(isSortedByDistance()));
     }
@@ -122,11 +122,9 @@ public class Story1Test {
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(replaceText("A"));
         closeSoftKeyboard();
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.recycler_view, 500));
+
         onView(withId(R.id.recycler_view)).perform(scrollToPosition(0));
         onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(0, R.id.label_text)).check(matches(withText("Ghana, Greater Accra, Accra")));
         onView(withId(R.id.recycler_view)).perform(scrollToPosition(1));
@@ -137,11 +135,9 @@ public class Story1Test {
         onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(3, R.id.label_text)).check(matches(withText("Ghana, Ashanti")));
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("B"));
         closeSoftKeyboard();
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.recycler_view, 500));
+
         onView(withId(R.id.recycler_view)).perform(scrollToPosition(0));
         onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(0, R.id.label_text)).check(matches(withText("Côte d'Ivoire, Abidjan, Abidjan, Abidjan")));
         onView(withId(R.id.recycler_view)).perform(scrollToPosition(1));

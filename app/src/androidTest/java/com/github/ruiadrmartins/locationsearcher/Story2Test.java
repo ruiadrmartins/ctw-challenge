@@ -29,8 +29,10 @@ import static android.support.test.espresso.contrib.RecyclerViewActions.actionOn
 import static android.support.test.espresso.intent.Intents.intended;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static com.github.ruiadrmartins.locationsearcher.TestUtilities.waitId;
 
 @RunWith(AndroidJUnit4.class)
 public class Story2Test {
@@ -71,19 +73,14 @@ public class Story2Test {
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
         onView(withId(android.support.design.R.id.search_src_text)).check(matches(withText("A")));
         closeSoftKeyboard();
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.recycler_view, 500));
+
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
         onView(withId(R.id.recycler_view)).perform(actionOnItemAtPosition(0, click()));
 
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        onView(isRoot()).perform(waitId(R.id.street_text, 500));
+
         onView(withId(R.id.street_text)).check(matches(isDisplayed()));
         onView(withId(R.id.street_text)).check(matches(withText("Accra, Ghana")));
         onView(withId(R.id.street_text)).check(isBelow(withId(R.id.mapfragment)));
@@ -110,18 +107,14 @@ public class Story2Test {
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
         onView(withId(android.support.design.R.id.search_src_text)).check(matches(withText("A")));
         closeSoftKeyboard();
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.recycler_view, 500));
+
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
         onView(withId(R.id.recycler_view)).perform(actionOnItemAtPosition(0, click()));
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.mapfragment, 500));
+
         intended(hasComponent(DetailActivity.class.getName()));
     }
 
@@ -132,19 +125,14 @@ public class Story2Test {
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
         onView(withId(android.support.design.R.id.search_src_text)).check(matches(withText("A")));
         closeSoftKeyboard();
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.recycler_view, 500));
+
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
         onView(withId(R.id.recycler_view)).perform(actionOnItemAtPosition(0, click()));
 
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        onView(isRoot()).perform(waitId(R.id.mapfragment, 500));
+
         onView(withId(R.id.mapfragment)).check(matches(isDisplayed()));
     }
 
@@ -172,18 +160,14 @@ public class Story2Test {
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
         onView(withId(android.support.design.R.id.search_src_text)).check(matches(withText("A")));
         closeSoftKeyboard();
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.recycler_view, 500));
+
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
         onView(withId(R.id.recycler_view)).perform(actionOnItemAtPosition(0, click()));
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.street_text, 500));
+
         onView(withId(R.id.street_text)).check(matches(isDisplayed()));
         onView(withId(R.id.street_text)).check(matches(withText("Accra, Ghana")));
         onView(withId(R.id.street_text)).check(isRightOf(withId(R.id.mapfragment)));

@@ -22,10 +22,12 @@ import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.github.ruiadrmartins.locationsearcher.TestUtilities.isSortedByDistance;
 import static com.github.ruiadrmartins.locationsearcher.TestUtilities.isSortedByName;
+import static com.github.ruiadrmartins.locationsearcher.TestUtilities.waitId;
 
 @RunWith(AndroidJUnit4.class)
 public class Story3Test {
@@ -67,21 +69,16 @@ public class Story3Test {
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(replaceText("A"));
         closeSoftKeyboard();
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.recycler_view, 500));
 
         // Check sorted by distance
         openActionBarOverflowOrOptionsMenu(mainActivityActivityTestRule.getActivity());
         onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).check(matches(isDisplayed()));
         onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).perform(click());
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.recycler_view, 500));
+
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
         onView(withId(R.id.recycler_view)).check(matches(isSortedByDistance()));
 
@@ -89,11 +86,9 @@ public class Story3Test {
         openActionBarOverflowOrOptionsMenu(mainActivityActivityTestRule.getActivity());
         onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_name))).check(matches(isDisplayed()));
         onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_name))).perform(click());
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        onView(isRoot()).perform(waitId(R.id.recycler_view, 500));
+
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
         onView(withId(R.id.recycler_view)).check(matches(isSortedByName()));
     }
