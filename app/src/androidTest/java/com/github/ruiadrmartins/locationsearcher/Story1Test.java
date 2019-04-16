@@ -3,28 +3,17 @@ package com.github.ruiadrmartins.locationsearcher;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
-
-import com.github.ruiadrmartins.locationsearcher.adapter.LocationAdapter;
-import com.github.ruiadrmartins.locationsearcher.data.autocomplete.Suggestion;
 import com.github.ruiadrmartins.locationsearcher.network.AppComponent;
 import com.github.ruiadrmartins.locationsearcher.network.mock.DaggerAppComponentMock;
 import com.github.ruiadrmartins.locationsearcher.network.mock.NetworkModuleMock;
 import com.github.ruiadrmartins.locationsearcher.ui.MainActivity;
-import com.google.common.collect.Ordering;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.action.ViewActions.typeText;
@@ -35,6 +24,8 @@ import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static com.github.ruiadrmartins.locationsearcher.TestUtilities.isSortedByDistance;
+
 
 @RunWith(AndroidJUnit4.class)
 public class Story1Test {
@@ -62,6 +53,9 @@ public class Story1Test {
     // 2. Locations are presented in a list format
     @Test
     public void insertInSearchBoxAndPresentResultTest() {
+        openActionBarOverflowOrOptionsMenu(mainActivityActivityTestRule.getActivity());
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).check(matches(isDisplayed()));
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).perform(click());
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
         onView(withId(android.support.design.R.id.search_src_text)).check(matches(withText("A")));
@@ -81,6 +75,9 @@ public class Story1Test {
     // 3. Locations must be sorted by distance
     @Test
     public void locationIsSortedByDistanceTest() {
+        openActionBarOverflowOrOptionsMenu(mainActivityActivityTestRule.getActivity());
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).check(matches(isDisplayed()));
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).perform(click());
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(replaceText("A"));
         try {
@@ -90,13 +87,15 @@ public class Story1Test {
         }
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
         onView(withId(R.id.recycler_view)).check(matches(isSortedByDistance()));
-
     }
 
     // 4. The user must be able to scroll through the list of locations
     // TODO: Find a better way to test this
     @Test
     public void locationListIsScrollableTest() {
+        openActionBarOverflowOrOptionsMenu(mainActivityActivityTestRule.getActivity());
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).check(matches(isDisplayed()));
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).perform(click());
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(replaceText("A"));
         onView(withText("Angola, Viana, Auto Estrada Golfe Camama")).check(doesNotExist());
@@ -107,6 +106,9 @@ public class Story1Test {
     // 5. Bonus: Search box should behave like an autocomplete (update the list while user is typing)
     @Test
     public void autocompleteSearchTest() {
+        openActionBarOverflowOrOptionsMenu(mainActivityActivityTestRule.getActivity());
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).check(matches(isDisplayed()));
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).perform(click());
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(replaceText("A"));
         try {
@@ -128,39 +130,5 @@ public class Story1Test {
         onView(withId(R.id.recycler_view)).check(matches(hasDescendant(withText("Côte d'Ivoire, Abidjan, Abidjan"))));
         onView(withId(R.id.recycler_view)).check(matches(hasDescendant(withText("Côte d'Ivoire, Abidjan"))));
         onView(withId(R.id.recycler_view)).check(matches(hasDescendant(withText("Côte d'Ivoire, Abidjan, Abidjan, Abidjan, Abidjan"))));
-    }
-
-    /**
-     * Adapted from https://blog.egorand.me/testing-a-sorted-list-with-espresso/
-     */
-    private static Matcher<View> isSortedByDistance() {
-        return new TypeSafeMatcher<View>() {
-
-            private final List<Integer> distances = new ArrayList<>();
-
-            @Override
-            protected boolean matchesSafely(View item) {
-                RecyclerView recyclerView = (RecyclerView) item;
-                LocationAdapter adapter = (LocationAdapter) recyclerView.getAdapter();
-                distances.clear();
-                distances.addAll(extractDistances(adapter.getLocationList()));
-
-                // Returns true if ordered from smaller to bigger integer
-                return Ordering.natural().isOrdered(distances);
-            }
-
-            private List<Integer> extractDistances(List<Suggestion> locationList) {
-                List<Integer> distances = new ArrayList<>();
-                for(Suggestion location: locationList) {
-                    distances.add(Integer.valueOf(location.getDistance()));
-                }
-                return distances;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("has items sorted alphabetically: " + distances);
-            }
-        };
     }
 }

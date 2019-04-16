@@ -81,6 +81,7 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
         }
 
         if(suggestion != null) {
+            setStreet(suggestion.getAddress().getStreet());
             setPostalCode(suggestion.getAddress().getPostalCode());
             setDistance(suggestion.getDistance());
         } else {

@@ -15,9 +15,14 @@ import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static com.github.ruiadrmartins.locationsearcher.TestUtilities.isSortedByDistance;
+import static com.github.ruiadrmartins.locationsearcher.TestUtilities.isSortedByName;
 
 @RunWith(AndroidJUnit4.class)
 public class Story3Test {
@@ -44,15 +49,46 @@ public class Story3Test {
     // 1. Users should open an overflow menu from the top bar
     // 2. "Sort by name", "Sort by distance" should be the options in the menu
     @Test
-    public void Test() {
+    public void openOverflowMenu_showOptionsTest() {
         openActionBarOverflowOrOptionsMenu(mainActivityActivityTestRule.getActivity());
         onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_name))).check(matches(isDisplayed()));
-        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_name))).check(matches(isDisplayed()));
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).check(matches(isDisplayed()));
     }
 
-    // TODO: 3. When tapping on any of the options, the list should be updated accordingly
+    // 3. When tapping on any of the options, the list should be updated accordingly
+    // TODO: Make this work
     @Test
-    public void Test3() {
+    public void tappingOptionsUpdatesListAccordinglyTest() {
+        onView(withId(R.id.search_view)).perform(click());
+        onView(withId(android.support.design.R.id.search_src_text)).perform(replaceText("A"));
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
+        // Check sorted by distance
+        openActionBarOverflowOrOptionsMenu(mainActivityActivityTestRule.getActivity());
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).check(matches(isDisplayed()));
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).perform(click());
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
+        onView(withId(R.id.recycler_view)).check(matches(isSortedByDistance()));
+
+        // Check sorted by name
+        openActionBarOverflowOrOptionsMenu(mainActivityActivityTestRule.getActivity());
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_name))).check(matches(isDisplayed()));
+        onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_name))).perform(click());
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
+        onView(withId(R.id.recycler_view)).check(matches(isSortedByName()));
     }
 }

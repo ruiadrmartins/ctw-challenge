@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.PositionAssertions.isBelow;
@@ -57,6 +58,10 @@ public class Story2Test {
         int originalOrientation = intentsTestRule.getActivity().getRequestedOrientation();
 
         intentsTestRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        openActionBarOverflowOrOptionsMenu(intentsTestRule.getActivity());
+        onView(withText(intentsTestRule.getActivity().getString(R.string.action_sort_distance))).check(matches(isDisplayed()));
+        onView(withText(intentsTestRule.getActivity().getString(R.string.action_sort_distance))).perform(click());
 
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
@@ -137,21 +142,25 @@ public class Story2Test {
     }
 
 
+    // TODO: 5. The map should contain a pin in the correct place for the selected location
+    /*@Test
+    public void checkForPinInMapTest() {
 
-    // 5. The map should contain a pin in the correct place for the selected location
-    @Test
-    public void Test5() {
-
-    }
+    }*/
 
     // 6. Bonus: When the orientation changes to landscape the map should be on the left of the other address details
     // TODO: Orientation doesn't go back to original
     @Test
     public void orientationChangeInformationLocationTest() {
 
+
         int originalOrientation = intentsTestRule.getActivity().getRequestedOrientation();
 
         intentsTestRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        openActionBarOverflowOrOptionsMenu(intentsTestRule.getActivity());
+        onView(withText(intentsTestRule.getActivity().getString(R.string.action_sort_distance))).check(matches(isDisplayed()));
+        onView(withText(intentsTestRule.getActivity().getString(R.string.action_sort_distance))).perform(click());
 
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));

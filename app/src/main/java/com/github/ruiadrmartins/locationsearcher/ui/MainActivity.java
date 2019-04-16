@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.adapter.LocationAdapter;
 import com.github.ruiadrmartins.locationsearcher.data.autocomplete.Suggestion;
 import com.github.ruiadrmartins.locationsearcher.util.Preferences;
+import com.github.ruiadrmartins.locationsearcher.util.Utilities;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -41,6 +43,8 @@ import java.util.Collections;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.github.ruiadrmartins.locationsearcher.util.Utilities.cleanupBreaks;
 
 public class MainActivity extends AppCompatActivity implements MainViewInterface, SearchView.OnQueryTextListener {
 
@@ -137,7 +141,17 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     @Override
     public void updateData(ArrayList<Suggestion> list){
         locationList = list;
-        Collections.sort(locationList);
+        switch(Preferences.getSortPreference(getApplicationContext())) {
+            case Preferences.SORT_BY_DISTANCE:
+                Collections.sort(locationList, (suggestion, t1) -> Integer.valueOf(suggestion.getDistance()).compareTo(Integer.valueOf(t1.getDistance())));
+                break;
+            case Preferences.SORT_BY_NAME:
+                Collections.sort(locationList, (suggestion, t1) -> cleanupBreaks(suggestion.getLabel()).compareTo(cleanupBreaks(t1.getLabel())));
+                break;
+            default:
+                Collections.sort(locationList, (suggestion, t1) -> Integer.valueOf(suggestion.getDistance()).compareTo(Integer.valueOf(t1.getDistance())));
+                break;
+        }
 
         LocationAdapter adapter = new LocationAdapter(this, locationList);
         recyclerView.setAdapter(adapter);
@@ -170,6 +184,17 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        switch(Preferences.getSortPreference(getApplicationContext())) {
+            case Preferences.SORT_BY_DISTANCE:
+                menu.getItem(Preferences.SORT_BY_DISTANCE).setChecked(true);
+                break;
+            case Preferences.SORT_BY_NAME:
+                menu.getItem(Preferences.SORT_BY_NAME).setChecked(true);
+                break;
+            default:
+                menu.getItem(Preferences.SORT_BY_DISTANCE).setChecked(true);
+                break;
+        }
         return true;
     }
 
@@ -181,13 +206,16 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         if (id == R.id.action_sort_distance) {
             Preferences.setSortPreference(getBaseContext(), Preferences.SORT_BY_DISTANCE);
             item.setChecked(true);
+            updateData(locationList);
             return true;
         }
         if (id == R.id.action_sort_name) {
             Preferences.setSortPreference(getBaseContext(), Preferences.SORT_BY_NAME);
             item.setChecked(true);
+            updateData(locationList);
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
