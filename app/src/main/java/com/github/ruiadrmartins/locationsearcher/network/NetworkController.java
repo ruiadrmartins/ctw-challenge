@@ -18,9 +18,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class NetworkController implements NetworkInterface {
 
-    public static final String TAG = NetworkController.class.getSimpleName();
+    private static final String TAG = NetworkController.class.getSimpleName();
 
-    public NetworkAPI initNetworkController(String url) {
+    private NetworkAPI initNetworkController(String url) {
         Gson gson = new GsonBuilder()
                 .setLenient()
                 .create();

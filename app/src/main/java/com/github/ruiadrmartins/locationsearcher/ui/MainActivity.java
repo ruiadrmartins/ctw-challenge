@@ -16,16 +16,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.adapter.LocationAdapter;
 import com.github.ruiadrmartins.locationsearcher.data.autocomplete.Suggestion;
 import com.github.ruiadrmartins.locationsearcher.util.Preferences;
-import com.github.ruiadrmartins.locationsearcher.util.Utilities;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -131,10 +128,7 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
                 R.drawable.ic_error_black_24dp,
                 getString(R.string.error_list_title), error,
                 getString(R.string.generic_error_button_message),
-                view -> {
-                    // TODO: THIS
-                    Toast.makeText(this, "Lol.", Toast.LENGTH_SHORT).show();
-                }
+                view -> updateData(locationList)
         );
     }
 
@@ -143,13 +137,13 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         locationList = list;
         switch(Preferences.getSortPreference(getApplicationContext())) {
             case Preferences.SORT_BY_DISTANCE:
-                Collections.sort(locationList, (suggestion, t1) -> Integer.valueOf(suggestion.getDistance()).compareTo(Integer.valueOf(t1.getDistance())));
+                Collections.sort(locationList, (suggestion1, suggestion2) -> Integer.valueOf(suggestion1.getDistance()).compareTo(Integer.valueOf(suggestion2.getDistance())));
                 break;
             case Preferences.SORT_BY_NAME:
-                Collections.sort(locationList, (suggestion, t1) -> cleanupBreaks(suggestion.getLabel()).compareTo(cleanupBreaks(t1.getLabel())));
+                Collections.sort(locationList, (suggestion1, suggestion2) -> cleanupBreaks(suggestion1.getLabel()).compareTo(cleanupBreaks(suggestion2.getLabel())));
                 break;
             default:
-                Collections.sort(locationList, (suggestion, t1) -> Integer.valueOf(suggestion.getDistance()).compareTo(Integer.valueOf(t1.getDistance())));
+                Collections.sort(locationList, (suggestion1, suggestion2) -> Integer.valueOf(suggestion1.getDistance()).compareTo(Integer.valueOf(suggestion2.getDistance())));
                 break;
         }
 
@@ -313,5 +307,11 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         super.onResume();
         checkPermissions();
         startLocationUpdates();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.close();
     }
 }

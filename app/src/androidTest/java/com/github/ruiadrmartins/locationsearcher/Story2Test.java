@@ -15,6 +15,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static android.support.test.espresso.Espresso.closeSoftKeyboard;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -32,7 +33,6 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 @RunWith(AndroidJUnit4.class)
 public class Story2Test {
 
-    // TODO: Use something else other than sleep, it's not reliable
     @Rule
     public IntentsTestRule<MainActivity> intentsTestRule = new IntentsTestRule<MainActivity>(MainActivity.class) {
 
@@ -66,6 +66,7 @@ public class Story2Test {
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
         onView(withId(android.support.design.R.id.search_src_text)).check(matches(withText("A")));
+        closeSoftKeyboard();
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -104,6 +105,7 @@ public class Story2Test {
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
         onView(withId(android.support.design.R.id.search_src_text)).check(matches(withText("A")));
+        closeSoftKeyboard();
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -125,6 +127,7 @@ public class Story2Test {
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
         onView(withId(android.support.design.R.id.search_src_text)).check(matches(withText("A")));
+        closeSoftKeyboard();
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -153,7 +156,6 @@ public class Story2Test {
     @Test
     public void orientationChangeInformationLocationTest() {
 
-
         int originalOrientation = intentsTestRule.getActivity().getRequestedOrientation();
 
         intentsTestRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -165,6 +167,7 @@ public class Story2Test {
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
         onView(withId(android.support.design.R.id.search_src_text)).check(matches(withText("A")));
+        closeSoftKeyboard();
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {

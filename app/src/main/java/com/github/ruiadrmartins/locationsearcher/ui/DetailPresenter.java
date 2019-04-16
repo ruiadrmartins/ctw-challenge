@@ -18,6 +18,7 @@ public class DetailPresenter implements DetailPresenterInterface {
 
     private Application application;
     private DetailViewInterface dvi;
+    private Disposable observable;
 
     @Inject
     NetworkInterface network;
@@ -32,8 +33,7 @@ public class DetailPresenter implements DetailPresenterInterface {
         if(Utilities.isNetworkConnected(application)) {
             ((LocationSearcherApplication) application).getAppComponent().inject(this);
 
-            // TODO: handle observable closure
-            Disposable observable = Observable.fromCallable(() -> network.startGetLocationDetails(application.getBaseContext(), locationId))
+            observable = Observable.fromCallable(() -> network.startGetLocationDetails(application.getBaseContext(), locationId))
                     .retry(5)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -43,17 +43,23 @@ public class DetailPresenter implements DetailPresenterInterface {
                                     String latitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLatitude());
                                     String longitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLongitude());
                                     String streetName = result.getResponse().getView().get(0).getResult().get(0).getLocation().getAddress().getLabel();
-                                    String coords = latitude + "," + longitude;
                                     dvi.updateMap(Double.valueOf(latitude), Double.valueOf(longitude));
-                                    dvi.setCoords(coords);
+                                    dvi.setCoords(Double.valueOf(latitude), Double.valueOf(longitude));
                                     dvi.setStreet(streetName);
                                 } else {
-                                    dvi.showError(application.getString(R.string.generic_error_message));
+                                    dvi.showGetDetailsError(application.getString(R.string.generic_error_message));
                                 }
                             },
-                            error -> dvi.showError(error.getMessage()));
+                            error -> dvi.showGetDetailsError(error.getMessage()));
         } else {
-            dvi.showError(application.getString(R.string.network_not_connected));
+            dvi.showGetDetailsError(application.getString(R.string.network_not_connected));
+        }
+    }
+
+    @Override
+    public void close() {
+        if(observable != null && !observable.isDisposed()) {
+            observable.dispose();
         }
     }
 }

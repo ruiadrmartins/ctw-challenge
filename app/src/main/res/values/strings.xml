@@ -14,6 +14,8 @@
     <string name="coordinates_label">Coordinates</string>
     <string name="distance_label">Distance</string>
 
+    <string name="coordinates_string">%1$s,%2$s</string>
+
     <string name="empty_list_title">No results</string>
     <string name="empty_list_description">Search for results</string>
 
@@ -21,6 +23,8 @@
 
     <string name="network_not_connected">Network not connected</string>
     <string name="generic_error_message">Something went wrong</string>
+    <string name="go_back_button_text">Go back</string>
+
 
     <string name="generic_error_button_message">Try again</string>
 </resources>

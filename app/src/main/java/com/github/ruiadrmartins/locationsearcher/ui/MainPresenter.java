@@ -20,6 +20,7 @@ public class MainPresenter implements MainPresenterInterface {
 
     private MainViewInterface mvi;
     private Application application;
+    private Disposable observable;
 
     @Inject
     NetworkInterface network;
@@ -34,8 +35,7 @@ public class MainPresenter implements MainPresenterInterface {
         if(Utilities.isNetworkConnected(application)) {
             ((LocationSearcherApplication) application).getAppComponent().inject(this);
 
-            // TODO: handle observable closure
-            Disposable observable = Observable.fromCallable(() -> network.startGetLocationsAutocomplete(application.getBaseContext(), text, longitude, latitude))
+            observable = Observable.fromCallable(() -> network.startGetLocationsAutocomplete(application.getBaseContext(), text, longitude, latitude))
                     .retry(5)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -50,6 +50,13 @@ public class MainPresenter implements MainPresenterInterface {
                             error -> mvi.showError(error.getMessage()));
         } else {
             mvi.showError(application.getString(R.string.network_not_connected));
+        }
+    }
+
+    @Override
+    public void close() {
+        if(observable != null && !observable.isDisposed()) {
+            observable.dispose();
         }
     }
 }

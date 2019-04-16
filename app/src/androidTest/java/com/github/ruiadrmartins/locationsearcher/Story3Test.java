@@ -13,6 +13,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static android.support.test.espresso.Espresso.closeSoftKeyboard;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -27,7 +28,6 @@ import static com.github.ruiadrmartins.locationsearcher.TestUtilities.isSortedBy
 @RunWith(AndroidJUnit4.class)
 public class Story3Test {
 
-    // TODO: Use something else other than sleep, it's not reliable
     @Rule
     public ActivityTestRule<MainActivity> mainActivityActivityTestRule = new ActivityTestRule<MainActivity>(MainActivity.class) {
 
@@ -56,11 +56,11 @@ public class Story3Test {
     }
 
     // 3. When tapping on any of the options, the list should be updated accordingly
-    // TODO: Make this work
     @Test
     public void tappingOptionsUpdatesListAccordinglyTest() {
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(replaceText("A"));
+        closeSoftKeyboard();
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {

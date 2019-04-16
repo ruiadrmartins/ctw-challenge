@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.data.autocomplete.Suggestion;
@@ -35,6 +34,8 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
     @BindView(R.id.distance_text) TextView distance;
     @BindView(R.id.toolbar) Toolbar toolbar;
 
+    private DetailPresenter presenter;
+
     private Map map = null;
     private MapFragment mapFragment = null;
 
@@ -61,7 +62,7 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
             linearLayout.setOrientation(LinearLayout.HORIZONTAL);
         }
 
-        DetailPresenter presenter = new DetailPresenter(this, getApplication());
+        presenter = new DetailPresenter(this, getApplication());
 
         if(savedInstanceState != null) {
             suggestion = savedInstanceState.getParcelable(LOCATION_DETAILS_KEY);
@@ -69,7 +70,7 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
             longitude = savedInstanceState.getDouble(LOCATION_DETAILS_LONGITUDE_KEY);
             streetName = savedInstanceState.getString(LOCATION_DETAILS_STREET_KEY);
             setStreet(streetName);
-            setCoords(latitude + "," + longitude);
+            setCoords(latitude, longitude);
             updateMap(latitude, longitude);
         } else if(getIntent() != null){
             suggestion = getIntent().getParcelableExtra(LOCATION_DETAILS_KEY);
@@ -90,15 +91,22 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
     }
 
     @Override
-    public void showError(String error) {
+    public void showGetDetailsError(String error) {
         progressLinearLayout.showError(
                 R.drawable.ic_error_black_24dp,
                 getString(R.string.error_list_title), error,
                 getString(R.string.generic_error_button_message),
-                view -> {
-                    // TODO: THIS
-                    Toast.makeText(this, "Lol.", Toast.LENGTH_SHORT).show();
-                }
+                view -> updateMap(latitude, longitude)
+        );
+    }
+
+    @Override
+    public void showError(String error) {
+        progressLinearLayout.showError(
+                R.drawable.ic_error_black_24dp,
+                getString(R.string.error_list_title), error,
+                getString(R.string.go_back_button_text),
+                view -> onBackPressed()
         );
     }
 
@@ -130,7 +138,8 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
     }
 
     @Override
-    public void setCoords(String coords) {
+    public void setCoords(double latitude, double longitude) {
+        String coords = getString(R.string.coordinates_string, String.valueOf(latitude), String.valueOf(longitude));
         coordinates.setText(coords);
     }
 
@@ -151,5 +160,11 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
         outState.putDouble(LOCATION_DETAILS_LONGITUDE_KEY, longitude);
         outState.putString(LOCATION_DETAILS_STREET_KEY, streetName);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.close();
     }
 }

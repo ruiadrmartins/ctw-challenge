@@ -12,6 +12,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static android.support.test.espresso.Espresso.closeSoftKeyboard;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -20,7 +21,6 @@ import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.contrib.RecyclerViewActions.scrollToPosition;
-import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
@@ -30,7 +30,7 @@ import static com.github.ruiadrmartins.locationsearcher.TestUtilities.isSortedBy
 @RunWith(AndroidJUnit4.class)
 public class Story1Test {
 
-    // TODO: Use something else other than sleep, it's not reliable
+    // TODO: Use something else other than Thread.sleep, it's not reliable
     @Rule
     public ActivityTestRule<MainActivity> mainActivityActivityTestRule = new ActivityTestRule<MainActivity>(MainActivity.class) {
 
@@ -59,17 +59,21 @@ public class Story1Test {
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
         onView(withId(android.support.design.R.id.search_src_text)).check(matches(withText("A")));
+        closeSoftKeyboard();
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
+        onView(withId(R.id.recycler_view)).perform(scrollToPosition(0));
         onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(0, R.id.label_text)).check(matches(withText("Ghana, Greater Accra, Accra")));
+        onView(withId(R.id.recycler_view)).perform(scrollToPosition(1));
         onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(1, R.id.label_text)).check(matches(withText("Ghana, Greater Accra, Accra, Accra")));
+        onView(withId(R.id.recycler_view)).perform(scrollToPosition(2));
         onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(2, R.id.label_text)).check(matches(withText("Ghana, Ashanti, Amansie West")));
+        onView(withId(R.id.recycler_view)).perform(scrollToPosition(3));
         onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(3, R.id.label_text)).check(matches(withText("Ghana, Ashanti")));
-
     }
 
     // 3. Locations must be sorted by distance
@@ -80,6 +84,7 @@ public class Story1Test {
         onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).perform(click());
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(replaceText("A"));
+        closeSoftKeyboard();
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -90,7 +95,6 @@ public class Story1Test {
     }
 
     // 4. The user must be able to scroll through the list of locations
-    // TODO: Find a better way to test this
     @Test
     public void locationListIsScrollableTest() {
         openActionBarOverflowOrOptionsMenu(mainActivityActivityTestRule.getActivity());
@@ -98,6 +102,7 @@ public class Story1Test {
         onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).perform(click());
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(replaceText("A"));
+        closeSoftKeyboard();
         onView(withText("Angola, Viana, Auto Estrada Golfe Camama")).check(doesNotExist());
         onView(withId(R.id.recycler_view)).perform(scrollToPosition(19));
         onView(withText("Angola, Viana, Auto Estrada Golfe Camama")).check(matches(isDisplayed()));
@@ -111,24 +116,34 @@ public class Story1Test {
         onView(withText(mainActivityActivityTestRule.getActivity().getString(R.string.action_sort_distance))).perform(click());
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(replaceText("A"));
+        closeSoftKeyboard();
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        onView(withId(R.id.recycler_view)).check(matches(hasDescendant(withText("Ghana, Greater Accra, Accra"))));
-        onView(withId(R.id.recycler_view)).check(matches(hasDescendant(withText("Ghana, Greater Accra, Accra, Accra"))));
-        onView(withId(R.id.recycler_view)).check(matches(hasDescendant(withText("Ghana, Ashanti, Amansie West"))));
-        onView(withId(R.id.recycler_view)).check(matches(hasDescendant(withText("Ghana, Ashanti"))));
+        onView(withId(R.id.recycler_view)).perform(scrollToPosition(0));
+        onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(0, R.id.label_text)).check(matches(withText("Ghana, Greater Accra, Accra")));
+        onView(withId(R.id.recycler_view)).perform(scrollToPosition(1));
+        onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(1, R.id.label_text)).check(matches(withText("Ghana, Greater Accra, Accra, Accra")));
+        onView(withId(R.id.recycler_view)).perform(scrollToPosition(2));
+        onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(2, R.id.label_text)).check(matches(withText("Ghana, Ashanti, Amansie West")));
+        onView(withId(R.id.recycler_view)).perform(scrollToPosition(3));
+        onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(3, R.id.label_text)).check(matches(withText("Ghana, Ashanti")));
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("B"));
+        closeSoftKeyboard();
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        onView(withId(R.id.recycler_view)).check(matches(hasDescendant(withText("Côte d'Ivoire, Abidjan, Abidjan, Abidjan"))));
-        onView(withId(R.id.recycler_view)).check(matches(hasDescendant(withText("Côte d'Ivoire, Abidjan, Abidjan"))));
-        onView(withId(R.id.recycler_view)).check(matches(hasDescendant(withText("Côte d'Ivoire, Abidjan"))));
-        onView(withId(R.id.recycler_view)).check(matches(hasDescendant(withText("Côte d'Ivoire, Abidjan, Abidjan, Abidjan, Abidjan"))));
+        onView(withId(R.id.recycler_view)).perform(scrollToPosition(0));
+        onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(0, R.id.label_text)).check(matches(withText("Côte d'Ivoire, Abidjan, Abidjan, Abidjan")));
+        onView(withId(R.id.recycler_view)).perform(scrollToPosition(1));
+        onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(1, R.id.label_text)).check(matches(withText("Côte d'Ivoire, Abidjan, Abidjan")));
+        onView(withId(R.id.recycler_view)).perform(scrollToPosition(2));
+        onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(2, R.id.label_text)).check(matches(withText("Côte d'Ivoire, Abidjan")));
+        onView(withId(R.id.recycler_view)).perform(scrollToPosition(3));
+        onView(new RecyclerViewMatcher(R.id.recycler_view).atPositionOnView(3, R.id.label_text)).check(matches(withText("Côte d'Ivoire, Abidjan, Abidjan, Abidjan, Abidjan")));
     }
 }
