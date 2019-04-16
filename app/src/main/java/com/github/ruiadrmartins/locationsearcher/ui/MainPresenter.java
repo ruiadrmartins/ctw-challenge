@@ -34,12 +34,19 @@ public class MainPresenter implements MainPresenterInterface {
         if(Utilities.isNetworkConnected(application)) {
             ((LocationSearcherApplication) application).getAppComponent().inject(this);
 
+            // TODO: handle observable closure
             Disposable observable = Observable.fromCallable(() -> network.startGetLocationsAutocomplete(application.getBaseContext(), text, longitude, latitude))
                     .retry(5)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
-                            result -> mvi.updateData(new ArrayList<>(result.getSuggestions())),
+                            result -> {
+                                if(result != null) {
+                                    mvi.updateData(new ArrayList<>(result.getSuggestions()));
+                                } else {
+                                    mvi.showError(application.getString(R.string.generic_error_message));
+                                }
+                            },
                             error -> mvi.showError(error.getMessage()));
         } else {
             mvi.showError(application.getString(R.string.network_not_connected));

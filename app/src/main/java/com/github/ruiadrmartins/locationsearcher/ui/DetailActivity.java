@@ -17,6 +17,9 @@ import com.here.android.mpa.mapping.MapFragment;
 import com.here.android.mpa.mapping.MapMarker;
 import com.vlonjatg.progressactivity.ProgressLinearLayout;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class DetailActivity extends AppCompatActivity implements DetailViewInterface {
 
     public static final String LOCATION_DETAILS_KEY = "locationDetails";
@@ -24,21 +27,18 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
     public static final String LOCATION_DETAILS_LONGITUDE_KEY = "locationLongitude";
     public static final String LOCATION_DETAILS_STREET_KEY = "streetName";
 
-    private LinearLayout linearLayout;
-    private ProgressLinearLayout progressLinearLayout;
-
-    private DetailPresenter presenter;
+    @BindView(R.id.detail_linear_Layout) LinearLayout linearLayout;
+    @BindView(R.id.progress_linear_layout) ProgressLinearLayout progressLinearLayout;
+    @BindView(R.id.street_text) TextView street;
+    @BindView(R.id.postal_code_text) TextView postalCode;
+    @BindView(R.id.coordinates_text) TextView coordinates;
+    @BindView(R.id.distance_text) TextView distance;
+    @BindView(R.id.toolbar) Toolbar toolbar;
 
     private Map map = null;
     private MapFragment mapFragment = null;
 
     private Suggestion suggestion;
-
-    private TextView street;
-    private TextView postalCode;
-    private TextView coordenates;
-    private TextView distance;
-
     private double latitude;
     private double longitude;
     private String streetName;
@@ -48,26 +48,20 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         linearLayout = findViewById(R.id.detail_linear_Layout);
 
-        if(getResources().getConfiguration().orientation== Configuration.ORIENTATION_PORTRAIT)  {
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)  {
             linearLayout.setOrientation(LinearLayout.VERTICAL);
         } else {
             linearLayout.setOrientation(LinearLayout.HORIZONTAL);
         }
 
-        presenter = new DetailPresenter(this, getApplication());
-
-        street = findViewById(R.id.street_text);
-        postalCode = findViewById(R.id.postal_code_text);
-        coordenates = findViewById(R.id.coordinates_text);
-        distance = findViewById(R.id.distance_text);
-
-        progressLinearLayout = findViewById(R.id.progress_linear_layout);
+        DetailPresenter presenter = new DetailPresenter(this, getApplication());
 
         if(savedInstanceState != null) {
             suggestion = savedInstanceState.getParcelable(LOCATION_DETAILS_KEY);
@@ -82,15 +76,16 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
             if(suggestion != null) {
                 presenter.getLocationDetails(suggestion.getLocationId());
             } else {
-                showError(getString(R.string.error_list_description));
+                showError(getString(R.string.generic_error_message));
             }
         }
 
         if(suggestion != null) {
+            setStreet(suggestion.getAddress().getStreet());
             setPostalCode(suggestion.getAddress().getPostalCode());
             setDistance(suggestion.getDistance());
         } else {
-            showError(getString(R.string.error_list_description));
+            showError(getString(R.string.generic_error_message));
         }
     }
 
@@ -98,9 +93,12 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
     public void showError(String error) {
         progressLinearLayout.showError(
                 R.drawable.ic_error_black_24dp,
-                getString(R.string.error_list_title), getString(R.string.error_list_description),
-                error,
-                view -> Toast.makeText(this, "Lol.", Toast.LENGTH_SHORT).show()
+                getString(R.string.error_list_title), error,
+                getString(R.string.generic_error_button_message),
+                view -> {
+                    // TODO: THIS
+                    Toast.makeText(this, "Lol.", Toast.LENGTH_SHORT).show();
+                }
         );
     }
 
@@ -133,12 +131,17 @@ public class DetailActivity extends AppCompatActivity implements DetailViewInter
 
     @Override
     public void setCoords(String coords) {
-        coordenates.setText(coords);
+        coordinates.setText(coords);
     }
 
     @Override
     public void setDistance(String dist) {
-        distance.setText(String.format(getString(R.string.distance_unit), dist));
+        Double distanceDouble = Double.valueOf(dist);
+        if(distanceDouble > 1000) {
+            distance.setText(String.format(getString(R.string.distance_unit_km), distanceDouble/1000));
+        } else {
+            distance.setText(String.format(getString(R.string.distance_unit_m), distanceDouble.intValue()));
+        }
     }
 
     @Override

@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import com.github.ruiadrmartins.locationsearcher.R;
 import com.github.ruiadrmartins.locationsearcher.adapter.LocationAdapter;
 import com.github.ruiadrmartins.locationsearcher.data.autocomplete.Suggestion;
 import com.github.ruiadrmartins.locationsearcher.util.Preferences;
+import com.github.ruiadrmartins.locationsearcher.util.Utilities;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -39,6 +41,11 @@ import com.vlonjatg.progressactivity.ProgressLinearLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+import static com.github.ruiadrmartins.locationsearcher.util.Utilities.cleanupBreaks;
+
 public class MainActivity extends AppCompatActivity implements MainViewInterface, SearchView.OnQueryTextListener {
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
@@ -49,9 +56,9 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     public static final String LOCATION_LATITUDE_KEY = "locationLatitude";
     public static final String LOCATION_LONGITUDE_KEY = "locationLongitude";
 
-    private SearchView searchView;
-    private RecyclerView recyclerView;
-    private LocationAdapter adapter;
+    @BindView(R.id.search_view) SearchView searchView;
+    @BindView(R.id.recycler_view) RecyclerView recyclerView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
 
     private MainPresenter presenter;
 
@@ -60,34 +67,31 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     private double longitude = 0;
     private double latitude = 0;
 
-    private FusedLocationProviderClient mFusedLocationClient;
-    private SettingsClient mSettingsClient;
-    private LocationRequest mLocationRequest;
-    private LocationSettingsRequest mLocationSettingsRequest;
-    private LocationCallback mLocationCallback;
-    private Location mCurrentLocation;
+    private FusedLocationProviderClient fusedLocationClient;
+    private SettingsClient settingsClient;
+    private LocationRequest locationRequest;
+    private LocationSettingsRequest locationSettingsRequest;
+    private LocationCallback locationCallback;
+    private Location currentLocation;
 
-    private ProgressLinearLayout progressLayout;
+    @BindView(R.id.progress_layout) ProgressLinearLayout progressLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+
+        ButterKnife.bind(this);
+
         setSupportActionBar(toolbar);
 
-        presenter = new MainPresenter(this, getApplication());
-
-        searchView = findViewById(R.id.search_view);
         searchView.setQueryHint(getString(R.string.search_hint)); // Por alguma razao, a versao support nao permite query hint no xml
         searchView.setOnQueryTextListener(this);
+        searchView.setIconifiedByDefault(false);
         searchView.setOnCloseListener(() -> true);
-
         searchView.requestFocus();
 
-        recyclerView = findViewById(R.id.recycler_view);
-
-        progressLayout = findViewById(R.id.progress_layout);
+        presenter = new MainPresenter(this, getApplication());
 
         if(savedInstanceState == null) {
             updateData(new ArrayList<>());
@@ -97,8 +101,8 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
             longitude = savedInstanceState.getDouble(LOCATION_LONGITUDE_KEY);
         }
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mSettingsClient = LocationServices.getSettingsClient(this);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        settingsClient = LocationServices.getSettingsClient(this);
 
         createLocationCallback();
         createLocationRequest();
@@ -126,17 +130,30 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         progressLayout.showError(
                 R.drawable.ic_error_black_24dp,
                 getString(R.string.error_list_title), error,
-                getString(R.string.error_list_button),
-                view -> Toast.makeText(this, "Lol.", Toast.LENGTH_SHORT).show()
+                getString(R.string.generic_error_button_message),
+                view -> {
+                    // TODO: THIS
+                    Toast.makeText(this, "Lol.", Toast.LENGTH_SHORT).show();
+                }
         );
     }
 
     @Override
     public void updateData(ArrayList<Suggestion> list){
         locationList = list;
-        Collections.sort(locationList);
+        switch(Preferences.getSortPreference(getApplicationContext())) {
+            case Preferences.SORT_BY_DISTANCE:
+                Collections.sort(locationList, (suggestion, t1) -> Integer.valueOf(suggestion.getDistance()).compareTo(Integer.valueOf(t1.getDistance())));
+                break;
+            case Preferences.SORT_BY_NAME:
+                Collections.sort(locationList, (suggestion, t1) -> cleanupBreaks(suggestion.getLabel()).compareTo(cleanupBreaks(t1.getLabel())));
+                break;
+            default:
+                Collections.sort(locationList, (suggestion, t1) -> Integer.valueOf(suggestion.getDistance()).compareTo(Integer.valueOf(t1.getDistance())));
+                break;
+        }
 
-        adapter = new LocationAdapter(this, locationList);
+        LocationAdapter adapter = new LocationAdapter(this, locationList);
         recyclerView.setAdapter(adapter);
         if(list.size() == 0) {
             showEmpty();
@@ -167,6 +184,17 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        switch(Preferences.getSortPreference(getApplicationContext())) {
+            case Preferences.SORT_BY_DISTANCE:
+                menu.getItem(Preferences.SORT_BY_DISTANCE).setChecked(true);
+                break;
+            case Preferences.SORT_BY_NAME:
+                menu.getItem(Preferences.SORT_BY_NAME).setChecked(true);
+                break;
+            default:
+                menu.getItem(Preferences.SORT_BY_DISTANCE).setChecked(true);
+                break;
+        }
         return true;
     }
 
@@ -178,13 +206,16 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         if (id == R.id.action_sort_distance) {
             Preferences.setSortPreference(getBaseContext(), Preferences.SORT_BY_DISTANCE);
             item.setChecked(true);
+            updateData(locationList);
             return true;
         }
         if (id == R.id.action_sort_name) {
             Preferences.setSortPreference(getBaseContext(), Preferences.SORT_BY_NAME);
             item.setChecked(true);
+            updateData(locationList);
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -200,18 +231,18 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     // Location stuff
     // Inspired from https://github.com/googlesamples/android-play-location/tree/master/LocationUpdates
     private void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest = new LocationRequest();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     private void createLocationCallback() {
-        mLocationCallback = new LocationCallback() {
+        locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
-                mCurrentLocation = locationResult.getLastLocation();
+                currentLocation = locationResult.getLastLocation();
                 updateLocation();
             }
         };
@@ -219,8 +250,8 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     private void buildLocationSettingsRequest() {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(mLocationRequest);
-        mLocationSettingsRequest = builder.build();
+        builder.addLocationRequest(locationRequest);
+        locationSettingsRequest = builder.build();
     }
 
     @Override
@@ -241,10 +272,10 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
-        mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
+        settingsClient.checkLocationSettings(locationSettingsRequest)
                 .addOnSuccessListener(this, locationSettingsResponse -> {
-                    mFusedLocationClient.requestLocationUpdates(mLocationRequest,
-                            mLocationCallback, Looper.myLooper());
+                    fusedLocationClient.requestLocationUpdates(locationRequest,
+                            locationCallback, Looper.myLooper());
                     updateLocation();
                 })
                 .addOnFailureListener(this, e -> {
@@ -271,9 +302,9 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     }
 
     private void updateLocation() {
-        if (mCurrentLocation != null) {
-            latitude = mCurrentLocation.getLatitude();
-            longitude = mCurrentLocation.getLongitude();
+        if (currentLocation != null) {
+            latitude = currentLocation.getLatitude();
+            longitude = currentLocation.getLongitude();
         }
     }
 
