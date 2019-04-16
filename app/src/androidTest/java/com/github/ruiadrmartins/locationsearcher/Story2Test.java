@@ -54,6 +54,10 @@ public class Story2Test {
     // 4. Location street, postal code, coordinates and distance should be displayed below the map
     @Test
     public void locationInformationBelowMapTest() {
+        int originalOrientation = intentsTestRule.getActivity().getRequestedOrientation();
+
+        intentsTestRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         onView(withId(R.id.search_view)).perform(click());
         onView(withId(android.support.design.R.id.search_src_text)).perform(typeText("A"));
         onView(withId(android.support.design.R.id.search_src_text)).check(matches(withText("A")));
@@ -83,9 +87,10 @@ public class Story2Test {
         onView(withId(R.id.coordinates_text)).check(isBelow(withId(R.id.mapfragment)));
 
         onView(withId(R.id.distance_text)).check(matches(isDisplayed()));
-        onView(withId(R.id.distance_text)).check(matches(withText("620881 meters")));
+        onView(withId(R.id.distance_text)).check(matches(withText("620.88km away")));
         onView(withId(R.id.distance_text)).check(isBelow(withId(R.id.mapfragment)));
 
+        intentsTestRule.getActivity().setRequestedOrientation(originalOrientation);
     }
 
     // 2. Tapping on a location presents a new screen
@@ -144,7 +149,7 @@ public class Story2Test {
     @Test
     public void orientationChangeInformationLocationTest() {
 
-        int initialOrientation = intentsTestRule.getActivity().getRequestedOrientation();
+        int originalOrientation = intentsTestRule.getActivity().getRequestedOrientation();
 
         intentsTestRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -176,10 +181,10 @@ public class Story2Test {
         onView(withId(R.id.coordinates_text)).check(isRightOf(withId(R.id.mapfragment)));
 
         onView(withId(R.id.distance_text)).check(matches(isDisplayed()));
-        onView(withId(R.id.distance_text)).check(matches(withText("620881 meters")));
+        onView(withId(R.id.distance_text)).check(matches(withText("620.88km away")));
         onView(withId(R.id.distance_text)).check(isRightOf(withId(R.id.mapfragment)));
 
-        intentsTestRule.getActivity().setRequestedOrientation(initialOrientation);
+        intentsTestRule.getActivity().setRequestedOrientation(originalOrientation);
     }
 
 }

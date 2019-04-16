@@ -14,8 +14,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-
-
 public class DetailPresenter implements DetailPresenterInterface {
 
     private Application application;
@@ -41,13 +39,17 @@ public class DetailPresenter implements DetailPresenterInterface {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                             result -> {
-                                String latitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLatitude());
-                                String longitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLongitude());
-                                String streetName = result.getResponse().getView().get(0).getResult().get(0).getLocation().getAddress().getLabel();
-                                String coords = latitude + "," + longitude;
-                                dvi.updateMap(Double.valueOf(latitude), Double.valueOf(longitude));
-                                dvi.setCoords(coords);
-                                dvi.setStreet(streetName);
+                                if(result!= null) {
+                                    String latitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLatitude());
+                                    String longitude = String.valueOf(result.getResponse().getView().get(0).getResult().get(0).getLocation().getDisplayPosition().getLongitude());
+                                    String streetName = result.getResponse().getView().get(0).getResult().get(0).getLocation().getAddress().getLabel();
+                                    String coords = latitude + "," + longitude;
+                                    dvi.updateMap(Double.valueOf(latitude), Double.valueOf(longitude));
+                                    dvi.setCoords(coords);
+                                    dvi.setStreet(streetName);
+                                } else {
+                                    dvi.showError(application.getString(R.string.generic_error_message));
+                                }
                             },
                             error -> dvi.showError(error.getMessage()));
         } else {

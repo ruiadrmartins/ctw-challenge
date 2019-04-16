@@ -18,6 +18,9 @@ import com.github.ruiadrmartins.locationsearcher.ui.DetailActivity;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.LocationHolder> {
 
     private Activity activity;
@@ -52,7 +55,13 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
         } else {
             locationHolder.labelText.setText(Html.fromHtml(locationList.get(i).getLabel()));
         }
-        locationHolder.distanceText.setText(String.format(activity.getString(R.string.distance_unit),locationList.get(i).getDistance()));
+
+        Double distance = Double.valueOf(locationList.get(i).getDistance());
+        if(distance > 1000) {
+            locationHolder.distanceText.setText(String.format(activity.getString(R.string.distance_unit_km), distance/1000));
+        } else {
+            locationHolder.distanceText.setText(String.format(activity.getString(R.string.distance_unit_m), distance.intValue()));
+        }
     }
 
     @Override
@@ -62,15 +71,13 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
 
     class LocationHolder extends RecyclerView.ViewHolder{
 
-        private CardView cardView;
-        private TextView labelText;
-        private TextView distanceText;
+        @BindView(R.id.card_view) CardView cardView;
+        @BindView(R.id.label_text) TextView labelText;
+        @BindView(R.id.distance_text) TextView distanceText;
 
         LocationHolder(@NonNull View itemView) {
             super(itemView);
-            cardView = itemView.findViewById(R.id.card_view);
-            labelText = itemView.findViewById(R.id.label_text);
-            distanceText = itemView.findViewById(R.id.distance_text);
+            ButterKnife.bind(this, itemView);
         }
     }
 }

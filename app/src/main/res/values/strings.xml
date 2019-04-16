@@ -5,7 +5,8 @@
     <string name="action_sort_distance">Sort by distance</string>
 
     <string name="search_hint">Search here</string>
-    <string name="distance_unit">%1$s meters</string>
+    <string name="distance_unit_m">%1$dm away</string>
+    <string name="distance_unit_km">%1$.2fkm away</string>
     <string name="title_activity_detail">Location Details</string>
 
     <string name="street_label">Street</string>
@@ -17,8 +18,9 @@
     <string name="empty_list_description">Search for results</string>
 
     <string name="error_list_title">Error</string>
-    <string name="error_list_description">Something went wrong</string>
-    <string name="error_list_button">Try again.</string>
 
     <string name="network_not_connected">Network not connected</string>
+    <string name="generic_error_message">Something went wrong</string>
+
+    <string name="generic_error_button_message">Try again</string>
 </resources>

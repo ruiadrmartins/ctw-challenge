@@ -39,7 +39,9 @@ import com.vlonjatg.progressactivity.ProgressLinearLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 
-// TODO: Butterknife
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity implements MainViewInterface, SearchView.OnQueryTextListener {
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
@@ -50,9 +52,9 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     public static final String LOCATION_LATITUDE_KEY = "locationLatitude";
     public static final String LOCATION_LONGITUDE_KEY = "locationLongitude";
 
-    private SearchView searchView;
-    private RecyclerView recyclerView;
-    private LocationAdapter adapter;
+    @BindView(R.id.search_view) SearchView searchView;
+    @BindView(R.id.recycler_view) RecyclerView recyclerView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
 
     private MainPresenter presenter;
 
@@ -61,35 +63,31 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     private double longitude = 0;
     private double latitude = 0;
 
-    private FusedLocationProviderClient mFusedLocationClient;
-    private SettingsClient mSettingsClient;
-    private LocationRequest mLocationRequest;
-    private LocationSettingsRequest mLocationSettingsRequest;
-    private LocationCallback mLocationCallback;
-    private Location mCurrentLocation;
+    private FusedLocationProviderClient fusedLocationClient;
+    private SettingsClient settingsClient;
+    private LocationRequest locationRequest;
+    private LocationSettingsRequest locationSettingsRequest;
+    private LocationCallback locationCallback;
+    private Location currentLocation;
 
-    private ProgressLinearLayout progressLayout;
+    @BindView(R.id.progress_layout) ProgressLinearLayout progressLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+
+        ButterKnife.bind(this);
+
         setSupportActionBar(toolbar);
 
-        presenter = new MainPresenter(this, getApplication());
-
-        searchView = findViewById(R.id.search_view);
         searchView.setQueryHint(getString(R.string.search_hint)); // Por alguma razao, a versao support nao permite query hint no xml
         searchView.setOnQueryTextListener(this);
         searchView.setIconifiedByDefault(false);
         searchView.setOnCloseListener(() -> true);
-
         searchView.requestFocus();
 
-        recyclerView = findViewById(R.id.recycler_view);
-
-        progressLayout = findViewById(R.id.progress_layout);
+        presenter = new MainPresenter(this, getApplication());
 
         if(savedInstanceState == null) {
             updateData(new ArrayList<>());
@@ -99,8 +97,8 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
             longitude = savedInstanceState.getDouble(LOCATION_LONGITUDE_KEY);
         }
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mSettingsClient = LocationServices.getSettingsClient(this);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        settingsClient = LocationServices.getSettingsClient(this);
 
         createLocationCallback();
         createLocationRequest();
@@ -128,8 +126,11 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         progressLayout.showError(
                 R.drawable.ic_error_black_24dp,
                 getString(R.string.error_list_title), error,
-                getString(R.string.error_list_button),
-                view -> Toast.makeText(this, "Lol.", Toast.LENGTH_SHORT).show()
+                getString(R.string.generic_error_button_message),
+                view -> {
+                    // TODO: THIS
+                    Toast.makeText(this, "Lol.", Toast.LENGTH_SHORT).show();
+                }
         );
     }
 
@@ -138,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         locationList = list;
         Collections.sort(locationList);
 
-        adapter = new LocationAdapter(this, locationList);
+        LocationAdapter adapter = new LocationAdapter(this, locationList);
         recyclerView.setAdapter(adapter);
         if(list.size() == 0) {
             showEmpty();
@@ -202,18 +203,18 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     // Location stuff
     // Inspired from https://github.com/googlesamples/android-play-location/tree/master/LocationUpdates
     private void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest = new LocationRequest();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     private void createLocationCallback() {
-        mLocationCallback = new LocationCallback() {
+        locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
-                mCurrentLocation = locationResult.getLastLocation();
+                currentLocation = locationResult.getLastLocation();
                 updateLocation();
             }
         };
@@ -221,8 +222,8 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     private void buildLocationSettingsRequest() {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(mLocationRequest);
-        mLocationSettingsRequest = builder.build();
+        builder.addLocationRequest(locationRequest);
+        locationSettingsRequest = builder.build();
     }
 
     @Override
@@ -243,10 +244,10 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
-        mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
+        settingsClient.checkLocationSettings(locationSettingsRequest)
                 .addOnSuccessListener(this, locationSettingsResponse -> {
-                    mFusedLocationClient.requestLocationUpdates(mLocationRequest,
-                            mLocationCallback, Looper.myLooper());
+                    fusedLocationClient.requestLocationUpdates(locationRequest,
+                            locationCallback, Looper.myLooper());
                     updateLocation();
                 })
                 .addOnFailureListener(this, e -> {
@@ -273,9 +274,9 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     }
 
     private void updateLocation() {
-        if (mCurrentLocation != null) {
-            latitude = mCurrentLocation.getLatitude();
-            longitude = mCurrentLocation.getLongitude();
+        if (currentLocation != null) {
+            latitude = currentLocation.getLatitude();
+            longitude = currentLocation.getLongitude();
         }
     }
 

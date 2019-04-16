@@ -18,6 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class NetworkController implements NetworkInterface {
 
+    public static final String TAG = NetworkController.class.getSimpleName();
 
     public NetworkAPI initNetworkController(String url) {
         Gson gson = new GsonBuilder()
@@ -52,6 +53,7 @@ public class NetworkController implements NetworkInterface {
             if(responseLocation.isSuccessful()) {
                 return responseLocation.body();
             } else {
+                Log.e(TAG, responseLocation.errorBody().string());
                 return null;
             }
         } catch (IOException e) {
@@ -77,10 +79,9 @@ public class NetworkController implements NetworkInterface {
             Response<LocationDetailsResult> responseLocationDetails = callLocation.execute();
 
             if(responseLocationDetails.isSuccessful()) {
-                Log.v("HMM","a");
                 return responseLocationDetails.body();
             } else {
-                Log.v("HMM",responseLocationDetails.errorBody().string());
+                Log.e(TAG, responseLocationDetails.errorBody().string());
                 return null;
             }
         } catch (IOException e) {
