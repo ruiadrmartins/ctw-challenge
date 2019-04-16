@@ -1,7 +1,9 @@
 package com.github.ruiadrmartins.locationsearcher;
 
+import android.Manifest;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
+import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
 import com.github.ruiadrmartins.locationsearcher.network.AppComponent;
 import com.github.ruiadrmartins.locationsearcher.network.mock.DaggerAppComponentMock;
@@ -29,6 +31,9 @@ import static com.github.ruiadrmartins.locationsearcher.TestUtilities.isSortedBy
 
 @RunWith(AndroidJUnit4.class)
 public class Story1Test {
+
+    @Rule public GrantPermissionRule permissionRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION);
+    @Rule public GrantPermissionRule permissionRule2 = GrantPermissionRule.grant(Manifest.permission.ACCESS_COARSE_LOCATION);
 
     // TODO: Use something else other than Thread.sleep, it's not reliable
     @Rule
